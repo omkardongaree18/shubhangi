@@ -6,9 +6,6 @@ from db_setup import get_db, hash_password, init_db, DB_PATH
 
 app = Flask(__name__)
 app.secret_key = 'college_acad_mgmt_secret_2026'
-@app.route("/")
-def home():
-    return "App working 🚀"
 
 # ── DECORATORS ────────────────────────────────────────────────────
 def login_required(role=None):
