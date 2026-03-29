@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Home</title>
+    <title>University System</title>
 </head>
 <body>
-    <h1>App is Live 🚀</h1>
+    <h1>Welcome to University Management System 🎓</h1>
+
+    {% for notice in notices %}
+        <p>{{ notice.title }}</p>
+    {% endfor %}
 </body>
 </html>
