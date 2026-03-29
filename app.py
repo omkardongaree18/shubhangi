@@ -6,6 +6,7 @@ from db_setup import get_db, hash_password, init_db, DB_PATH
 
 app = Flask(__name__)
 app.secret_key = 'college_acad_mgmt_secret_2026'
+init_db() 
 
 # ── DECORATORS ────────────────────────────────────────────────────
 def login_required(role=None):
@@ -146,7 +147,10 @@ def inject_globals():
 # ── PUBLIC ROUTES ─────────────────────────────────────────────────
 @app.route('/')
 def home_main():
-    return "App working 🚀"
+    db = get_db()
+    notices = db.execute("SELECT * FROM notices WHERE is_active=1 ORDER BY created_at DESC LIMIT 5").fetchall()
+    db.close()
+    return render_template('index.html', notices=notices)
 @app.route('/about')
 def about():
     return render_template('about.html')
