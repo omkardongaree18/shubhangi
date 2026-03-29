@@ -145,7 +145,7 @@ def inject_globals():
 
 # ── PUBLIC ROUTES ─────────────────────────────────────────────────
 @app.route('/')
-def home():
+def home_main():
     db = get_db()
     notices = db.execute("SELECT * FROM notices WHERE is_active=1 ORDER BY created_at DESC LIMIT 5").fetchall()
     db.close()
