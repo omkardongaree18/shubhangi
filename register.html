@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Register | College Academic Portal{% endblock %}
+{% block extra_head %}
+<style>
+body{background:linear-gradient(135deg,#04080f,#0d1b2e);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px 20px}
+.reg-card{background:rgba(8,14,26,.97);border:1px solid #1a2840;border-radius:22px;max-width:580px;width:100%;padding:42px;box-shadow:0 20px 60px rgba(0,0,0,.5);animation:slideUp .5s ease both}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+</style>
+{% endblock %}
+{% block navbar %}{% endblock %}{% block footer %}{% endblock %}
+{% block content %}
+<div class="reg-card">
+  <div style="text-align:center;margin-bottom:28px">
+    <div style="font-size:48px;margin-bottom:10px">🎓</div>
+    <h2 style="font-weight:900;color:#e2e8f0">Create Account</h2>
+    <p style="color:#64748b;font-size:13px">College Academic Management Portal</p>
+  </div>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}{% for cat, msg in messages %}
+    <div style="background:{% if cat=='error' %}rgba(248,113,113,.1){% else %}rgba(0,245,160,.1){% endif %};border:1px solid {% if cat=='error' %}rgba(248,113,113,.3){% else %}rgba(0,245,160,.3){% endif %};border-radius:10px;padding:10px 14px;font-size:13px;color:{% if cat=='error' %}#f87171{% else %}#00f5a0{% endif %};margin-bottom:14px">{{ msg }}</div>
+    {% endfor %}{% endif %}
+  {% endwith %}
+
+  <form method="POST" id="regForm">
+    <div style="margin-bottom:14px">
+      <label class="lbl">Full Name</label>
+      <input type="text" class="inp" name="name" placeholder="Your full name" required>
+    </div>
+    <div style="margin-bottom:14px">
+      <label class="lbl">Email Address</label>
+      <input type="email" class="inp" name="email" placeholder="your@email.com" required>
+    </div>
+    <div style="margin-bottom:14px">
+      <label class="lbl">Password</label>
+      <input type="password" class="inp" name="password" placeholder="Min 6 characters" required minlength="6">
+    </div>
+    <div style="margin-bottom:14px">
+      <label class="lbl">Role</label>
+      <select class="inp" name="role" id="roleSelect" onchange="toggleFields()" required>
+        <option value="" disabled selected>Select Role</option>
+        <option value="student">Student</option>
+        <option value="faculty">Faculty</option>
+      </select>
+    </div>
+
+    <!-- STUDENT FIELDS -->
+    <div id="studentFields" style="display:none">
+      <div style="margin-bottom:14px">
+        <label class="lbl">Course</label>
+        <select class="inp" name="course_id" id="courseSelect" onchange="updateDeptFromCourse()">
+          <option value="" disabled selected>Select your course</option>
+          {% for c in courses %}
+          <option value="{{ c.id }}" data-dept="{{ c.department_id }}">
+            {{ c.name }} ({{ c.code }}) — {{ c.dept_name }} — {{ c.total_semesters }} Sems
+          </option>
+          {% endfor %}
+        </select>
+        <p style="color:#64748b;font-size:11px;margin-top:5px">
+          B.Com / B.Sc → 3 Years (6 Semesters) &nbsp;|&nbsp; M.Com / MCA → 2 Years (4 Semesters)
+        </p>
+      </div>
+      <!-- hidden dept for student, auto-filled from course -->
+      <input type="hidden" id="studentDeptId" name="department_id" value="">
+    </div>
+
+    <!-- FACULTY FIELDS -->
+    <div id="facultyFields" style="display:none">
+      <div style="margin-bottom:14px">
+        <label class="lbl">Department</label>
+        <select class="inp" id="facultyDeptSelect">
+          <option value="" disabled selected>Select Department</option>
+          {% for d in departments %}
+          <option value="{{ d.id }}">{{ d.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <input type="hidden" id="facultyDeptId" name="department_id" value="">
+    </div>
+
+    <div style="margin-bottom:14px">
+      <label class="lbl">Phone <span style="color:#64748b">(optional)</span></label>
+      <input type="text" class="inp" name="phone" placeholder="+91 XXXXX XXXXX">
+    </div>
+
+    <button type="submit" class="btn-accent" style="width:100%;padding:13px;font-size:15px;margin-top:8px">
+      Create Account →
+    </button>
+  </form>
+  <div style="text-align:center;margin-top:16px">
+    <a href="{{ url_for('login') }}" style="color:#00f5a0;font-size:13px">Already have an account? Login →</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const roleSelect       = document.getElementById('roleSelect');
+const courseSelect     = document.getElementById('courseSelect');
+const studentDeptId    = document.getElementById('studentDeptId');
+const facultyDeptSel   = document.getElementById('facultyDeptSelect');
+const facultyDeptId    = document.getElementById('facultyDeptId');
+
+function toggleFields() {
+  const role = roleSelect.value;
+  document.getElementById('studentFields').style.display = role === 'student' ? 'block' : 'none';
+  document.getElementById('facultyFields').style.display = role === 'faculty' ? 'block' : 'none';
+}
+
+function updateDeptFromCourse() {
+  const opt = courseSelect.options[courseSelect.selectedIndex];
+  studentDeptId.value = opt ? (opt.getAttribute('data-dept') || '') : '';
+}
+
+facultyDeptSel.addEventListener('change', function() {
+  facultyDeptId.value = this.value;
+});
+
+document.getElementById('regForm').addEventListener('submit', function(e) {
+  const role = roleSelect.value;
+  if (role === 'student' && !courseSelect.value) {
+    e.preventDefault(); alert('Please select a course.'); return;
+  }
+  if (role === 'faculty' && !facultyDeptSel.value) {
+    e.preventDefault(); alert('Please select a department.'); return;
+  }
+  // Ensure only the correct dept hidden field is submitted
+  if (role === 'student') { facultyDeptId.disabled = true; }
+  else                    { studentDeptId.disabled = true; }
+});
+</script>
+{% endblock %}

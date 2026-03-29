@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+
+:root {
+  --bg:#04080f; --bg2:#080e1a; --bg3:#0c1424; --border:#1a2840;
+  --accent:#00f5a0; --accent2:#38bdf8; --text:#e2e8f0; --muted:#64748b;
+  --danger:#f87171; --warning:#fbbf24; --purple:#a78bfa; --orange:#f97316;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text)}
+h1,h2,h3,h4,h5,h6{font-family:'Syne',sans-serif}
+
+/* NAVBAR */
+.navbar-custom{background:rgba(4,8,15,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);position:fixed;width:100%;top:0;z-index:999;padding:14px 0}
+.nav-brand{font-family:'Syne',sans-serif;font-weight:900;font-size:22px;color:#fff;text-decoration:none;letter-spacing:-.3px}
+.nav-links{display:flex;align-items:center;gap:4px;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:500;transition:all .2s}
+.nav-links a:hover,.nav-links a.active{background:rgba(0,245,160,.1);color:var(--accent)}
+.btn-login-nav{background:linear-gradient(135deg,var(--accent),var(--accent2))!important;color:var(--bg)!important;font-weight:800!important;border-radius:10px!important;padding:9px 22px!important}
+
+/* GLASS */
+.glass{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px}
+.glass-sm{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px}
+
+/* INPUTS */
+.inp{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-size:14px;outline:none;width:100%;transition:border .2s;font-family:'DM Sans',sans-serif}
+.inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,245,160,.08)}
+select.inp option{background:var(--bg3)}
+textarea.inp{resize:vertical;min-height:110px}
+.lbl{color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:6px;font-weight:600}
+
+/* BUTTONS */
+.btn-g{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;padding:12px 28px;color:var(--bg);font-weight:800;font-size:14px;cursor:pointer;font-family:'Syne',sans-serif;letter-spacing:.02em;transition:all .2s;display:inline-block;text-decoration:none}
+.btn-g:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,245,160,.3);color:var(--bg)}
+.btn-sm{padding:7px 16px;border-radius:9px;font-size:12px;border:none;cursor:pointer;font-weight:700;transition:all .2s}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:10px;padding:8px 18px;font-size:13px;cursor:pointer;transition:all .2s}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+
+/* BADGES */
+.badge-tag{padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;font-family:'Syne',sans-serif;letter-spacing:.05em;text-transform:uppercase}
+.badge-danger{background:rgba(248,113,113,.15);color:var(--danger);border:1px solid rgba(248,113,113,.25)}
+.badge-success{background:rgba(0,245,160,.12);color:var(--accent);border:1px solid rgba(0,245,160,.2)}
+.badge-warning{background:rgba(251,191,36,.12);color:var(--warning);border:1px solid rgba(251,191,36,.2)}
+.badge-primary{background:rgba(56,189,248,.12);color:var(--accent2);border:1px solid rgba(56,189,248,.2)}
+.badge-info{background:rgba(167,139,250,.12);color:var(--purple);border:1px solid rgba(167,139,250,.2)}
+
+/* STAT CARDS */
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:22px 24px;transition:.25s;position:relative;overflow:hidden}
+.stat-card:hover{border-color:rgba(0,245,160,.25);transform:translateY(-3px)}
+.stat-num{font-family:'Syne',sans-serif;font-size:32px;font-weight:900;line-height:1}
+
+/* TABLE */
+.uni-table{width:100%;border-collapse:collapse;font-size:13px}
+.uni-table th{color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;padding:11px 16px;border-bottom:1px solid var(--border);font-weight:700;text-align:left}
+.uni-table td{padding:13px 16px;border-bottom:1px solid rgba(26,40,64,.5);color:var(--text)}
+.uni-table tr:hover td{background:rgba(255,255,255,.02)}
+
+/* ALERTS */
+.flash-box{border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;display:flex;align-items:center;gap:10px}
+.flash-success{background:rgba(0,245,160,.08);border:1px solid rgba(0,245,160,.25);color:var(--accent)}
+.flash-error{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25);color:var(--danger)}
+
+/* SIDEBAR */
+.sidebar{width:236px;min-height:100vh;background:var(--bg2);border-right:1px solid var(--border);position:fixed;top:0;left:0;z-index:100;padding-top:74px}
+.sidebar-inner{padding:16px 12px}
+.sidebar-section{font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:14px 10px 5px;opacity:.7}
+.sidebar a{display:flex;align-items:center;gap:10px;padding:10px 12px;color:var(--muted);text-decoration:none;font-size:13.5px;font-weight:500;transition:all .2s;border-radius:10px;margin-bottom:2px}
+.sidebar a:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.sidebar a.active{background:rgba(0,245,160,.1);color:var(--accent)}
+.sidebar a .ico{font-size:16px;width:20px;text-align:center}
+.sidebar-user{margin:14px 12px;padding:14px;background:var(--bg3);border:1px solid var(--border);border-radius:12px}
+.main-content{margin-left:236px;padding:88px 32px 48px;min-height:100vh}
+
+/* GRADE COLORS */
+.g-S{color:#00f5a0}.g-A{color:#38bdf8}.g-B{color:#a78bfa}.g-C{color:#fbbf24}.g-D{color:#f97316}.g-F{color:#f87171}
+
+/* RISK BAR */
+.risk-bar{height:8px;border-radius:5px;background:var(--border);overflow:hidden;margin-top:6px}
+.risk-fill{height:100%;border-radius:5px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+
+/* CHART CONTAINER */
+.chart-wrap{position:relative;height:220px}
+
+/* PAGE HEADER */
+.page-header{margin-bottom:28px}
+.page-header h2{font-size:26px;font-weight:800;margin-bottom:4px}
+.page-header p{color:var(--muted);font-size:14px}
+
+footer{background:var(--bg);border-top:1px solid var(--border);padding:24px 0;color:var(--muted);font-size:13px;text-align:center;margin-top:60px}
+
+@media(max-width:768px){.sidebar{display:none}.main-content{margin-left:0;padding:80px 16px 30px}}

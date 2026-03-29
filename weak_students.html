@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Weak Students | AI University{% endblock %}
+{% block navbar %}{% endblock %}
+{% block content %}
+{% include "components/sidebar.html" %}
+<div class="main-content">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+    <div>
+      <h2 style="font-weight:900">🚨 At-Risk Students</h2>
+      <p style="color:#64748b;font-size:13px">AI-identified students requiring immediate attention</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span style="color:#64748b;font-size:13px">Threshold:</span>
+      {% for t, label in [(0.25,'Low+'), (0.45,'Medium+'), (0.6,'High Only')] %}
+      <a href="{{ url_for('weak_students', threshold=t) }}" style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid {% if threshold|float == t %}rgba(248,113,113,.4){% else %}#1a2840{% endif %};background:{% if threshold|float == t %}rgba(248,113,113,.1){% else %}#0c1424{% endif %};color:{% if threshold|float == t %}#f87171{% else %}#94a3b8{% endif %}">{{ label }}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if students %}
+  <div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="glass-sm text-center"><div style="font-size:28px;font-weight:900;color:#f87171">{{ students|length }}</div><div style="color:#64748b;font-size:12px">AT-RISK STUDENTS</div></div></div>
+    <div class="col-md-4"><div class="glass-sm text-center"><div style="font-size:28px;font-weight:900;color:#fbbf24">{{ (students|sum(attribute='cgpa') / students|length)|round(2) }}</div><div style="color:#64748b;font-size:12px">AVG CGPA</div></div></div>
+    <div class="col-md-4"><div class="glass-sm text-center"><div style="font-size:28px;font-weight:900;color:#a78bfa">{{ (students|sum(attribute='attendance_pct') / students|length)|round(1) }}%</div><div style="color:#64748b;font-size:12px">AVG ATTENDANCE</div></div></div>
+  </div>
+
+  <div class="glass">
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr style="border-bottom:2px solid #1a2840">
+          {% for h in ['Student','Roll No','CGPA','Attendance','Risk %','Level','Actions'] %}
+          <th style="padding:12px 10px;text-align:{% if loop.first %}left{% else %}center{% endif %};color:#64748b;font-size:11px;text-transform:uppercase">{{ h }}</th>
+          {% endfor %}
+        </tr></thead>
+        <tbody>
+          {% for st in students %}
+          {% set rp = (st['risk_score'] * 100)|int %}
+          {% set rc = '#f87171' if st['risk_score'] > 0.55 else '#fbbf24' %}
+          {% set rl = 'High' if st['risk_score'] > 0.55 else 'Medium' %}
+          <tr style="border-bottom:1px solid #1a2840" onmouseover="this.style.background='#0c1424'" onmouseout="this.style.background='transparent'">
+            <td style="padding:12px 10px">
+              <div style="font-weight:700">{{ st.name if st.name else '—' }}</div>
+              <div style="color:#64748b;font-size:11px">{{ st['email'] }}</div>
+            </td>
+            <td style="padding:12px 10px;text-align:center;font-family:monospace;font-size:12px;color:#64748b">{{ st['roll_no'] }}</td>
+            <td style="padding:12px 10px;text-align:center;font-weight:700;color:{{ '#f87171' if st['cgpa'] < 5 else '#fbbf24' }}">{{ st['cgpa'] }}</td>
+            <td style="padding:12px 10px;text-align:center;color:{{ '#f87171' if st['att_pct'] < 75 else '#94a3b8' }}">{{ st['att_pct'] }}%</td>
+            <td style="padding:12px 10px;text-align:center">
+              <div style="background:#0c1424;border-radius:4px;height:6px;margin-bottom:4px;width:80px;margin:0 auto 4px">
+                <div style="height:6px;border-radius:4px;background:{{ rc }};width:{{ rp }}%"></div>
+              </div>
+              <span style="font-size:12px;color:{{ rc }};font-weight:700">{{ rp }}%</span>
+            </td>
+            <td style="padding:12px 10px;text-align:center">
+              <span style="background:{{ rc }}18;color:{{ rc }};border:1px solid {{ rc }}40;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700">{{ rl }}</span>
+            </td>
+            <td style="padding:12px 10px;text-align:center">
+              <div style="display:flex;gap:6px;justify-content:center">
+                <button onclick="sendAlert('{{ st.name if st.name else st['roll_no'] }}')" style="padding:5px 10px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3);border-radius:7px;color:#38bdf8;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">📩 SMS</button>
+                <button onclick="showRecommendations('{{ st.name if st.name else st['roll_no'] }}','{{ rl }}')" style="padding:5px 10px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);border-radius:7px;color:#a78bfa;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">💡 Tips</button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SMS Modal -->
+  <div id="smsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center">
+    <div style="background:#080e1a;border:1px solid rgba(56,189,248,.3);border-radius:20px;padding:36px;max-width:420px;width:90%;text-align:center">
+      <div style="font-size:48px;margin-bottom:14px">📩</div>
+      <h4 style="color:#38bdf8;font-weight:900;margin-bottom:10px">SMS Alert Sent!</h4>
+      <p style="color:#94a3b8;font-size:14px;margin-bottom:20px" id="smsMsg"></p>
+      <button onclick="document.getElementById('smsModal').style.display='none'" style="padding:10px 24px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3);border-radius:10px;color:#38bdf8;font-weight:700;cursor:pointer;font-family:inherit">Close</button>
+    </div>
+  </div>
+
+  <!-- Tips Modal -->
+  <div id="tipsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center">
+    <div style="background:#080e1a;border:1px solid rgba(167,139,250,.3);border-radius:20px;padding:36px;max-width:480px;width:90%">
+      <h4 style="color:#a78bfa;font-weight:900;margin-bottom:16px">💡 Recommendations</h4>
+      <p style="color:#94a3b8;font-size:14px;margin-bottom:16px" id="tipsStudent"></p>
+      <ul style="color:#e2e8f0;font-size:14px;line-height:2;padding-left:20px" id="tipsList"></ul>
+      <button onclick="document.getElementById('tipsModal').style.display='none'" style="margin-top:16px;padding:10px 24px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);border-radius:10px;color:#a78bfa;font-weight:700;cursor:pointer;font-family:inherit;width:100%">Close</button>
+    </div>
+  </div>
+
+  {% else %}
+  <div style="text-align:center;padding:80px 20px;color:#64748b">
+    <div style="font-size:56px;margin-bottom:16px">✅</div>
+    <h4 style="color:#00f5a0;margin-bottom:8px">No At-Risk Students Found</h4>
+    <p>No students above the {{ (threshold * 100)|int }}% risk threshold.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function sendAlert(name) {
+  document.getElementById('smsMsg').textContent = `Alert sent to ${name} and their guardian. Message: "Your academic performance requires immediate attention. Please contact your faculty."`;
+  document.getElementById('smsModal').style.display = 'flex';
+}
+function showRecommendations(name, level) {
+  const tips = level === 'High' ? [
+    '📚 Attend all classes — aim for 100% this week',
+    '🗓️ Schedule a meeting with your academic advisor immediately',
+    '📖 Join the university study groups for your weak subjects',
+    '⏰ Reduce social activities and increase study hours to 6+/day',
+    '🏥 If health issues, apply for medical leave and revaluation',
+  ] : [
+    '📈 Focus on improving 2-3 weakest subjects this semester',
+    '📅 Maintain attendance above 85% going forward',
+    '💬 Participate actively in tutorials and lab sessions',
+    '📝 Complete all assignments on time for internal marks',
+    '🤝 Connect with toppers in your class for peer learning',
+  ];
+  document.getElementById('tipsStudent').textContent = `Recommendations for ${name}:`;
+  document.getElementById('tipsList').innerHTML = tips.map(t => `<li>${t}</li>`).join('');
+  document.getElementById('tipsModal').style.display = 'flex';
+}
+</script>
+{% endblock %}

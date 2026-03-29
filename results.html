@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Results | AI University</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+body{font-family:'Segoe UI',sans-serif;background:#f0f4f8}
+.topbar{background:linear-gradient(90deg,#0d47a1,#0d6efd);padding:14px 25px;color:white;display:flex;justify-content:space-between;align-items:center}
+.sidebar{height:calc(100vh - 56px);background:linear-gradient(180deg,#0d47a1,#0d6efd);padding-top:16px;position:sticky;top:0;overflow-y:auto}
+.sidebar a{color:rgba(255,255,255,.85);padding:12px 20px;display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500;border-left:3px solid transparent;transition:.2s}
+.sidebar a:hover,.sidebar a.active{background:rgba(255,255,255,.15);border-left-color:#ffc107;color:white}
+.sc{background:white;border-radius:16px;padding:24px;box-shadow:0 4px 16px rgba(0,0,0,.08);margin-bottom:24px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h5 class="mb-0"><i class="bi bi-mortarboard-fill me-2"></i>AI University Portal</h5>
+  <div class="d-flex align-items-center gap-3">
+    <span><i class="bi bi-person-circle me-1"></i><b>{{ session.get('name','Student') }}</b></span>
+    <a href="/logout" class="btn btn-light btn-sm">Logout</a>
+  </div>
+</div>
+<div class="container-fluid"><div class="row g-0">
+  <div class="col-md-2 sidebar">
+    <a href="/student/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="/student/profile"><i class="bi bi-person-circle"></i> My Profile</a>
+    <a href="/student/results" class="active"><i class="bi bi-bar-chart-line"></i> Results</a>
+    <a href="/student/attendance"><i class="bi bi-calendar-check"></i> Attendance</a>
+    <a href="/student/ai-insights"><i class="bi bi-robot"></i> AI Insights</a>
+    <a href="/student/chatbot"><i class="bi bi-chat-dots"></i> AI Chatbot</a>
+    <a href="/logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+  </div>
+  <div class="col-md-10" style="padding:28px">
+    <h4 class="mb-1">📋 Academic Results</h4>
+    <p class="text-muted mb-4" style="font-size:13px">CGPA: <b>{{ cgpa }}</b> / 10.0</p>
+
+    <!-- Semester info -->
+    <div class="d-flex gap-2 flex-wrap mb-4">
+      <span class="badge bg-primary bg-opacity-10 text-primary" style="font-size:13px;padding:8px 16px;border-radius:20px">All Semesters</span>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3"><div class="sc text-center py-3"><h4 class="fw-bold text-primary mb-0">{{ cgpa }}</h4><small class="text-muted">CGPA</small></div></div>
+      <div class="col-md-3"><div class="sc text-center py-3"><h4 class="fw-bold text-success mb-0">{{ marks|length }}</h4><small class="text-muted">Subjects</small></div></div>
+      <div class="col-md-3"><div class="sc text-center py-3"><h4 class="fw-bold text-danger mb-0">{{ marks|selectattr('grade','equalto','F')|list|length }}</h4><small class="text-muted">Backlogs</small></div></div>
+      <div class="col-md-3"><div class="sc text-center py-3"><h4 class="fw-bold text-warning mb-0">{{ (marks|sum(attribute='total') / [marks|length,1]|max)|round(1) if marks else 0 }}</h4><small class="text-muted">Avg Total</small></div></div>
+    </div>
+
+    <div class="sc">
+      <h6 class="fw-bold mb-3">📊 Detailed Marksheet</h6>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-primary">
+            <tr><th>Subject</th><th>Code</th><th>Sem</th><th>Internal (30)</th><th>External (70)</th><th>Total (100)</th><th>Grade</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            {% set gc = {'O':'success','A+':'success','S':'success','A':'info','B+':'info','B':'warning','C':'warning','D':'secondary','F':'danger'} %}
+            {% for m in marks %}
+            <tr>
+              <td><b>{{ m['subname'] if m['subname'] else '—' }}</b></td>
+              <td class="text-muted small">{{ m['code'] if m['code'] else '—' }}</td>
+              <td>{{ m.semester }}</td>
+              <td>{{ m.internal1 }}</td>
+              <td>{{ m.external }}</td>
+              <td><b>{{ m.total }}</b></td>
+              <td><span class="badge bg-{{ gc.get(m.grade,'secondary') }}">{{ m.grade }}</span></td>
+              <td>
+                {% if m.grade == 'F' %}
+                <span class="badge bg-danger">FAIL</span>
+                {% else %}
+                <span class="badge bg-success">PASS</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="8" class="text-center text-muted py-5">
+              <i class="bi bi-inbox" style="font-size:32px"></i><br>No marks uploaded yet.
+            </td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

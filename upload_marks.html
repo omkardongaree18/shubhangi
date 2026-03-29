@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Upload Marks | AI University{% endblock %}
+{% block navbar %}{% endblock %}
+{% block content %}
+{% include "components/sidebar.html" %}
+<div class="main-content">
+  <h2 style="font-weight:900;margin-bottom:24px">📤 Upload Marks</h2>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}{% for cat, msg in messages %}
+    <div style="background:{% if cat=='error' %}rgba(248,113,113,.1){% else %}rgba(0,245,160,.1){% endif %};border:1px solid {% if cat=='error' %}rgba(248,113,113,.3){% else %}rgba(0,245,160,.3){% endif %};border-radius:10px;padding:12px 16px;font-size:13px;color:{% if cat=='error' %}#f87171{% else %}#00f5a0{% endif %};margin-bottom:16px">{{ msg }}</div>
+    {% endfor %}{% endif %}
+  {% endwith %}
+
+  <div class="row g-4">
+    <div class="col-md-5">
+      <div class="glass">
+        <h6 style="font-weight:800;margin-bottom:18px">✏️ Enter Marks Manually</h6>
+        <form method="POST" action="{{ url_for('upload_marks') }}">
+          <div style="margin-bottom:14px">
+            <label class="lbl">Select Student</label>
+            <select class="inp" name="student_id" required>
+              <option value="" disabled selected>Choose student…</option>
+              {% for st in students %}
+              <option value="{{ st.id }}">{{ st.name }} — {{ st['roll_no'] }} ({{ st.course_name }}, Sem {{ st.semester }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div style="margin-bottom:14px">
+            <label class="lbl">Select Subject</label>
+            <select class="inp" name="subject_id" required>
+              <option value="" disabled selected>Choose subject…</option>
+              {% for s in subjects %}
+              <option value="{{ s.id }}">{{ s['name'] }} ({{ s['code'] }}) — Sem {{ s['sem_no'] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div style="margin-bottom:14px">
+            <label class="lbl">Semester</label>
+            <select class="inp" name="semester">
+              {% for i in range(1,9) %}<option value="{{ i }}">Semester {{ i }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="row g-3 mb-4">
+            <div class="col-6">
+              <label class="lbl">Internal (max 30)</label>
+              <input type="number" class="inp" name="internal1" min="0" max="30" step="0.5" placeholder="0–30" required oninput="calcTotal()">
+            </div>
+            <div class="col-6">
+              <label class="lbl">External (max 70)</label>
+              <input type="number" class="inp" name="external" min="0" max="70" step="0.5" placeholder="0–70" required oninput="calcTotal()">
+            </div>
+          </div>
+          <div style="background:#0c1424;border-radius:10px;padding:14px;margin-bottom:16px;text-align:center;display:flex;justify-content:space-between">
+            <span style="color:#64748b;font-size:13px">Calculated Total:</span>
+            <span id="totalPreview" style="font-weight:900;color:#00f5a0;font-size:18px">—</span>
+            <span id="gradePreview" style="font-weight:700;color:#38bdf8">—</span>
+          </div>
+          <button type="submit" class="btn-accent" style="width:100%;padding:12px;font-size:15px">Upload Marks</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-md-7">
+      <div class="glass mb-4">
+        <h6 style="font-weight:800;margin-bottom:16px">📊 Grading Scale</h6>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead><tr style="border-bottom:1px solid #1a2840">
+              <th style="padding:10px;color:#64748b;font-size:11px;text-transform:uppercase">Grade</th>
+              <th style="padding:10px;color:#64748b;font-size:11px;text-transform:uppercase;text-align:center">Range</th>
+              <th style="padding:10px;color:#64748b;font-size:11px;text-transform:uppercase;text-align:center">Points</th>
+              <th style="padding:10px;color:#64748b;font-size:11px;text-transform:uppercase;text-align:center">Remarks</th>
+            </tr></thead>
+            <tbody>
+              {% for grade, low, high, pts, remark, color in [
+                ('O', 90, 100, 10, 'Outstanding', '#00f5a0'),
+                ('A+', 75, 89, 9, 'Excellent', '#38bdf8'),
+                ('A', 60, 74, 8, 'Very Good', '#a78bfa'),
+                ('B', 50, 59, 7, 'Good', '#fbbf24'),
+                ('C', 40, 49, 6, 'Average', '#fb923c'),
+                ('F', 0, 39, 0, 'Fail', '#f87171'),
+              ] %}
+              <tr style="border-bottom:1px solid #1a2840">
+                <td style="padding:10px"><span style="background:{{ color }}20;color:{{ color }};padding:3px 14px;border-radius:20px;font-weight:700">{{ grade }}</span></td>
+                <td style="padding:10px;text-align:center;color:#94a3b8">{{ low }}–{{ high }}</td>
+                <td style="padding:10px;text-align:center;font-weight:700">{{ pts }}</td>
+                <td style="padding:10px;text-align:center;color:#64748b">{{ remark }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent uploads -->
+      <div class="glass">
+        <h6 style="font-weight:800;margin-bottom:14px">🕐 Recent Uploads</h6>
+        {% if recent_marks %}
+          {% for m in recent_marks %}
+          {% set grade_colors = {'O':'#00f5a0','A+':'#38bdf8','A':'#a78bfa','B':'#fbbf24','C':'#fb923c','F':'#f87171'} %}
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#0c1424;border-radius:10px;margin-bottom:6px;font-size:13px">
+            <div>
+              <div style="font-weight:600">{{ m['stuname'] if True else '—' }}</div>
+              <div style="color:#64748b;font-size:11px">{{ m['subname'] if m['subname'] else '—' }} · Sem {{ m.semester }}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:700">{{ m.total }} / 100</div>
+              <span style="background:{{ grade_colors.get(m.grade,'#64748b') }}20;color:{{ grade_colors.get(m.grade,'#64748b') }};padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700">{{ m.grade }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+        <p style="color:#64748b;font-size:13px">No marks uploaded yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function calcTotal() {
+  const i = parseFloat(document.querySelector('[name=internal1]').value) || 0;
+  const e = parseFloat(document.querySelector('[name=external]').value) || 0;
+  const t = i + e;
+  document.getElementById('totalPreview').textContent = t.toFixed(1);
+  let g = 'F', c = '#f87171';
+  if (t >= 90) { g = 'O';  c = '#00f5a0'; }
+  else if (t >= 75) { g = 'A+'; c = '#38bdf8'; }
+  else if (t >= 60) { g = 'A';  c = '#a78bfa'; }
+  else if (t >= 50) { g = 'B';  c = '#fbbf24'; }
+  else if (t >= 40) { g = 'C';  c = '#fb923c'; }
+  const gEl = document.getElementById('gradePreview');
+  gEl.textContent = g;
+  gEl.style.color = c;
+}
+</script>
+{% endblock %}

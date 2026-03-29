@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us | AI University Portal</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+body{ background:linear-gradient(135deg,#0f2027,#203a43,#2c5364); color:white; font-family:'Segoe UI',sans-serif; min-height:100vh; }
+.navbar-custom{ background:rgba(0,0,0,0.4); backdrop-filter:blur(10px); border-bottom:1px solid rgba(255,255,255,0.1); }
+.glass{ background:rgba(255,255,255,0.08); backdrop-filter:blur(12px); border-radius:20px; border:1px solid rgba(255,255,255,0.15); box-shadow:0 8px 32px rgba(0,0,0,0.3); }
+.section-title{ font-weight:700; letter-spacing:1px; }
+.feature-icon{ font-size:40px; }
+.hero{ height:50vh; background:url('https://images.unsplash.com/photo-1523580846011-d3a5bc25702b') center/cover no-repeat; position:relative; display:flex; align-items:center; justify-content:center; }
+.hero-overlay{ position:absolute; inset:0; background:rgba(0,0,0,0.55); }
+.hero-content{ position:relative; z-index:2; text-align:center; }
+.faculty-card{ background:rgba(255,255,255,0.1); border-radius:16px; padding:22px; text-align:center; border:1px solid rgba(255,255,255,0.15); transition:.25s; }
+.faculty-card:hover{ transform:translateY(-4px); background:rgba(255,255,255,0.16); }
+.faculty-avatar{ width:70px; height:70px; border-radius:50%; background:linear-gradient(135deg,#1a73e8,#0dcaf0); display:flex; align-items:center; justify-content:center; font-size:30px; margin:0 auto 12px; }
+.tech-badge{ display:inline-block; padding:5px 14px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:20px; font-size:12px; margin:4px; }
+.accred-badge{ background:rgba(26,115,232,0.2); border:1px solid rgba(26,115,232,0.4); border-radius:14px; padding:18px; text-align:center; }
+footer{ background:rgba(0,0,0,0.4); text-align:center; padding:18px; color:rgba(255,255,255,0.6); margin-top:40px; }
+</style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark navbar-custom navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/">🎓 AI University</a>
+    <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+        <li class="nav-item"><a class="nav-link active" href="/about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="/courses">Courses</a></li>
+        <li class="nav-item"><a class="nav-link" href="/notices">Notices</a></li>
+        <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+        <li class="nav-item"><a class="nav-link btn btn-primary text-white px-3 ms-2" href="/login">Login</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <p style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#0dcaf0;margin-bottom:10px">EST. 2012 · NAAC A++ ACCREDITED</p>
+    <h1 class="display-4 fw-bold">About Our AI Academic Portal</h1>
+    <p class="lead">Transforming Education with Intelligence & Innovation</p>
+  </div>
+</section>
+
+<div class="container my-5">
+  <div class="glass p-5 mb-5">
+    <h2 class="section-title mb-3">🎓 Our Mission</h2>
+    <p class="lead">Our AI Academic Performance Portal is designed to modernize university management using Artificial Intelligence, Data Analytics, and Secure Digital Technologies. We aim to help institutions track student progress, predict academic risks, and improve learning outcomes through intelligent insights.</p>
+  </div>
+
+  <div class="glass p-5 mb-5">
+    <h2 class="section-title mb-4">🚀 What This Portal Provides</h2>
+    <div class="row text-center">
+      {% for icon,title,desc in [
+        ('📊','Performance Analytics','Visual dashboards to monitor student marks, attendance, and academic trends.'),
+        ('🤖','AI Prediction System','Machine Learning models predict weak students and recommend improvements.'),
+        ('🔐','Secure Data Management','All academic records are safely stored with encrypted database protection.'),
+        ('📈','Result Trend Analysis','Track performance growth using interactive graphs and semester comparisons.'),
+        ('📩','Automated Alerts','Instant notifications and reports sent to students, faculty, and parents.'),
+        ('🏆','Smart Academic Reports','Generate professional report cards and AI-based performance feedback.'),
+        ('🔗','Blockchain Certificates','Tamper-proof digital certificate verification system.'),
+        ('📅','Smart Attendance','Face recognition and digital attendance management system.'),
+      ] %}
+      <div class="col-md-3 col-6 mb-4">
+        <div class="feature-icon">{{ icon }}</div>
+        <h6 class="fw-bold mt-2">{{ title }}</h6>
+        <p class="small" style="color:rgba(255,255,255,0.7)">{{ desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="glass p-5 mb-5">
+    <h2 class="section-title mb-3">🧠 Technologies Used</h2>
+    <div>
+      {% for t in ['Python & Flask','Machine Learning','Deep Learning','SQLite / PostgreSQL','Bootstrap 5','Chart.js','Scikit-learn','Blockchain (SHA-256)','REST APIs','Flask Sessions','SHAP Explainable AI','ReportLab PDF'] %}
+      <span class="tech-badge">{{ t }}</span>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="glass p-5 mb-5">
+    <h2 class="section-title mb-4">👨‍🏫 Leadership & Faculty</h2>
+    <div class="row g-3">
+      {% for emoji,name,desig,dept in [
+        ('👨‍💼','Dr. Ramesh Sharma','Head of Department','Computer Science & Engineering'),
+        ('👩‍🏫','Prof. Anjali Mehta','Associate Professor','Artificial Intelligence'),
+        ('👨‍🔬','Dr. Vikram Nair','Professor','Data Science'),
+        ('👩‍💻','Dr. Priya Iyer','Assistant Professor','Software Engineering'),
+      ] %}
+      <div class="col-md-3 col-6">
+        <div class="faculty-card">
+          <div class="faculty-avatar">{{ emoji }}</div>
+          <h6 class="fw-bold mb-1">{{ name }}</h6>
+          <div style="color:#0dcaf0;font-size:12px;margin-bottom:3px">{{ desig }}</div>
+          <div style="font-size:11px;opacity:.7">{{ dept }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="glass p-5 mb-5">
+    <h2 class="section-title mb-4">🏅 Accreditations & Rankings</h2>
+    <div class="row g-3">
+      {% for badge,label in [('NAAC A++','National Assessment & Accreditation'),('NBA','National Board of Accreditation'),('NIRF Top 50','National Institutional Ranking Framework'),('ISO 9001:2015','Quality Management Certified')] %}
+      <div class="col-md-3 col-6">
+        <div class="accred-badge">
+          <div class="fw-bold" style="font-size:18px;color:#0dcaf0">{{ badge }}</div>
+          <div style="font-size:11px;opacity:.8;margin-top:4px">{{ label }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="glass p-5">
+    <h2 class="section-title mb-3">🏫 Why This Project Matters</h2>
+    <p class="lead">Universities generate massive academic data every semester. Without intelligent systems, it becomes difficult to identify struggling students and improve overall results. Our portal uses AI to convert raw data into meaningful decisions, helping institutions provide better education and student success.</p>
+  </div>
+</div>
+
+<footer>© {{ current_year }} AI University Academic Portal | Designed for Smart Education</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Edit Profile | AI University</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+body{font-family:'Segoe UI',sans-serif;background:#f0f4f8}
+.topbar{background:linear-gradient(90deg,#0d47a1,#0d6efd);padding:14px 25px;color:white;display:flex;justify-content:space-between;align-items:center}
+.sidebar{height:calc(100vh - 56px);background:linear-gradient(180deg,#0d47a1,#0d6efd);padding-top:16px;position:sticky;top:0;overflow-y:auto}
+.sidebar a{color:rgba(255,255,255,.85);padding:12px 20px;display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500;border-left:3px solid transparent;transition:.2s}
+.sidebar a:hover,.sidebar a.active{background:rgba(255,255,255,.15);border-left-color:#ffc107;color:#fff}
+.sc{background:#fff;border-radius:16px;padding:28px;box-shadow:0 4px 16px rgba(0,0,0,.08);margin-bottom:24px}
+.section-header{font-size:15px;font-weight:700;color:#0d47a1;margin-bottom:20px;display:flex;align-items:center;gap:8px;padding-bottom:12px;border-bottom:2px solid #eff6ff}
+.form-label{font-weight:600;font-size:13px;color:#374151;margin-bottom:6px}
+.form-control,.form-select{border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:13px;transition:.2s}
+.form-control:focus,.form-select:focus{border-color:#0d6efd;box-shadow:0 0 0 3px rgba(13,110,253,.1)}
+.form-control[readonly]{background:#f8faff;color:#64748b}
+.av{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#0d47a1,#0d6efd);display:flex;align-items:center;justify-content:center;font-size:28px;color:white;font-weight:700;margin:0 auto 12px;box-shadow:0 4px 14px rgba(13,71,161,.3)}
+.pwd-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;color:#64748b;font-size:16px;background:none;border:none;padding:0}
+.pwd-toggle:hover{color:#0d6efd}
+.strength-bar{height:4px;border-radius:2px;background:#e5e7eb;margin-top:6px;overflow:hidden}
+.strength-fill{height:100%;border-radius:2px;width:0%;transition:width .3s,background .3s}
+</style>
+</head><body>
+
+<div class="topbar">
+  <h5 class="mb-0"><i class="bi bi-mortarboard-fill me-2"></i>AI University Portal</h5>
+  <div class="d-flex gap-3 align-items-center">
+    <span><i class="bi bi-person-circle me-1"></i><b>{{ user_name }}</b></span>
+    <a href="/logout" class="btn btn-light btn-sm">Logout</a>
+  </div>
+</div>
+
+<div class="container-fluid"><div class="row g-0">
+  <div class="col-md-2 sidebar">
+    <a href="/student/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="/student/profile" class="active"><i class="bi bi-person-circle"></i> My Profile</a>
+    <a href="/student/results"><i class="bi bi-bar-chart-line"></i> Results</a>
+    <a href="/student/attendance"><i class="bi bi-calendar-check"></i> Attendance</a>
+    <a href="/student/ai-insights"><i class="bi bi-robot"></i> AI Insights</a>
+    <a href="/student/chatbot"><i class="bi bi-chat-dots"></i> AI Chatbot</a>
+    <a href="/logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+  </div>
+
+  <div class="col-md-10" style="padding:32px">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h4 class="mb-1">✏️ Edit Profile</h4>
+        <p class="text-muted mb-0" style="font-size:13px">Update your personal information and account settings</p>
+      </div>
+      <a href="/student/profile" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Back to Profile
+      </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+    <div class="alert alert-{{ cat }} alert-dismissible py-2 mb-4">
+      <i class="bi bi-{{ 'check-circle' if cat=='success' else 'exclamation-circle' }} me-2"></i>{{ msg }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endwith %}
+
+    <div class="row g-4">
+
+      <!-- Avatar + read-only academic info -->
+      <div class="col-md-3">
+        <div class="sc text-center">
+          <div class="av">{{ (user_name[0] if user_name else 'S') | upper }}</div>
+          <h6 class="fw-bold mb-1">{{ user_name }}</h6>
+          <p class="text-muted mb-3" style="font-size:12px">{{ user_email }}</p>
+          <span class="badge bg-primary mb-3">Student</span>
+          <hr>
+          <div class="text-start mt-3">
+            <p style="font-size:12px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.5px" class="mb-2">Academic Info</p>
+            <div style="font-size:13px;color:#374151;line-height:2.2">
+              <div><i class="bi bi-credit-card text-primary me-2"></i>{{ student.roll_no if student else '—' }}</div>
+              <div><i class="bi bi-building text-success me-2"></i>{{ student.dept_name if student else '—' }}</div>
+              <div><i class="bi bi-calendar3 text-warning me-2"></i>Year {{ student.year if student else '—' }}</div>
+            </div>
+            <p class="text-muted mt-3 mb-0" style="font-size:11px">
+              <i class="bi bi-lock-fill me-1"></i>Academic fields can only be updated by admin/faculty.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit form -->
+      <div class="col-md-9">
+
+        <!-- ── Personal Info Form ───────────────────── -->
+        <div class="sc">
+          <div class="section-header">
+            <i class="bi bi-person-fill text-primary"></i>
+            Personal Information
+          </div>
+          <form method="POST" action="/student/edit-profile" id="editForm"><input type="hidden" name="action" value="profile">
+            <div class="row g-3">
+
+              <div class="col-md-6">
+                <label class="form-label"><i class="bi bi-person me-1 text-primary"></i>Full Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="name"
+                       value="{{ student.name if student else user_name }}"
+                       placeholder="Your full name" required maxlength="100">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label"><i class="bi bi-envelope me-1 text-info"></i>Email</label>
+                <input type="text" class="form-control" value="{{ user_email }}" readonly>
+                <div class="form-text" style="font-size:11px">Login email cannot be changed</div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label"><i class="bi bi-telephone me-1 text-success"></i>Phone Number</label>
+                <input type="tel" class="form-control" name="phone"
+                       value="{{ student.phone if student and student.phone else '' }}"
+                       placeholder="10-digit mobile number" maxlength="15"
+                       pattern="[0-9]{10,15}">
+                <div class="form-text" style="font-size:11px">Used for SMS alerts and emergency contact</div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label"><i class="bi bi-cake2 me-1 text-danger"></i>Date of Birth</label>
+                <input type="date" class="form-control" name="dob"
+                       value="{{ student.dob if student and student.dob else '' }}"
+                       max="{{ '2010-01-01' }}">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label"><i class="bi bi-droplet-half me-1 text-danger"></i>Blood Group</label>
+                <select class="form-select" name="blood_grp">
+                  <option value="">-- Select Blood Group --</option>
+                  {% for bg in ['A+','A-','B+','B-','AB+','AB-','O+','O-'] %}
+                  <option value="{{ bg }}" >{{ bg }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label"><i class="bi bi-geo-alt me-1 text-secondary"></i>Address</label>
+                <textarea class="form-control" name="address" rows="3"
+                          placeholder="Your home address"
+                          maxlength="300">{{ student.address if student and student.address else '' }}</textarea>
+              </div>
+
+            </div>
+
+            <div class="d-flex gap-3 mt-4">
+              <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-save me-2"></i>Save Changes
+              </button>
+              <a href="/student/profile" class="btn btn-outline-secondary px-4">
+                <i class="bi bi-x me-2"></i>Cancel
+              </a>
+            </div>
+          </form>
+        </div>
+
+        <!-- ── Change Password Form ────────────────── -->
+        <div class="sc" id="changePassword">
+          <div class="section-header">
+            <i class="bi bi-shield-lock-fill text-warning"></i>
+            Change Password
+          </div>
+          <form method="POST" action="/student/edit-profile" id="pwdForm"><input type="hidden" name="action" value="password">
+            <div class="row g-3">
+
+              <div class="col-md-12">
+                <label class="form-label"><i class="bi bi-lock me-1 text-secondary"></i>Current Password <span class="text-danger">*</span></label>
+                <div class="position-relative">
+                  <input type="password" class="form-control pe-5" name="old_password"
+                         id="oldPwd" placeholder="Enter your current password" required>
+                  <button class="pwd-toggle" type="button" onclick="togglePwd('oldPwd','eyeOld')">
+                    <i class="bi bi-eye" id="eyeOld"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label"><i class="bi bi-key me-1 text-primary"></i>New Password <span class="text-danger">*</span></label>
+                <div class="position-relative">
+                  <input type="password" class="form-control pe-5" name="new_password"
+                         id="newPwd" placeholder="Min. 6 characters" required minlength="6"
+                         oninput="checkStrength(this.value)">
+                  <button class="pwd-toggle" type="button" onclick="togglePwd('newPwd','eyeNew')">
+                    <i class="bi bi-eye" id="eyeNew"></i>
+                  </button>
+                </div>
+                <div class="strength-bar mt-2"><div class="strength-fill" id="strengthBar"></div></div>
+                <div id="strengthLabel" style="font-size:11px;color:#94a3b8;margin-top:4px"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label"><i class="bi bi-key-fill me-1 text-success"></i>Confirm New Password <span class="text-danger">*</span></label>
+                <div class="position-relative">
+                  <input type="password" class="form-control pe-5" name="confirm_password"
+                         id="confirmPwd" placeholder="Re-enter new password" required minlength="6"
+                         oninput="checkMatch()">
+                  <button class="pwd-toggle" type="button" onclick="togglePwd('confirmPwd','eyeConfirm')">
+                    <i class="bi bi-eye" id="eyeConfirm"></i>
+                  </button>
+                </div>
+                <div id="matchMsg" style="font-size:11px;margin-top:4px"></div>
+              </div>
+
+            </div>
+
+            <div class="p-3 rounded mt-3" style="background:#fefce8;border:1px solid #fde68a;font-size:12px;color:#92400e">
+              <i class="bi bi-info-circle me-2"></i>
+              <b>Tips:</b> Use at least 6 characters with a mix of letters, numbers and symbols for a strong password.
+            </div>
+
+            <div class="d-flex gap-3 mt-4">
+              <button type="submit" class="btn btn-warning px-4" id="pwdBtn" disabled>
+                <i class="bi bi-shield-lock me-2"></i>Update Password
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Toggle password visibility
+function togglePwd(inputId, iconId) {
+  const inp = document.getElementById(inputId);
+  const ico = document.getElementById(iconId);
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    ico.className = 'bi bi-eye-slash';
+  } else {
+    inp.type = 'password';
+    ico.className = 'bi bi-eye';
+  }
+}
+
+// Password strength meter
+function checkStrength(val) {
+  const bar = document.getElementById('strengthBar');
+  const lbl = document.getElementById('strengthLabel');
+  let score = 0;
+  if (val.length >= 6) score++;
+  if (val.length >= 10) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+
+  const levels = [
+    { w: '20%', bg: '#ef4444', text: 'Very Weak' },
+    { w: '40%', bg: '#f97316', text: 'Weak' },
+    { w: '60%', bg: '#fbbf24', text: 'Fair' },
+    { w: '80%', bg: '#34d399', text: 'Strong' },
+    { w: '100%', bg: '#10b981', text: 'Very Strong' },
+  ];
+  const lvl = levels[Math.min(score, 4)];
+  bar.style.width = val ? lvl.w : '0%';
+  bar.style.background = lvl.bg;
+  lbl.textContent = val ? lvl.text : '';
+  lbl.style.color = lvl.bg;
+  checkMatch();
+}
+
+// Password match checker
+function checkMatch() {
+  const np = document.getElementById('newPwd').value;
+  const cp = document.getElementById('confirmPwd').value;
+  const msg = document.getElementById('matchMsg');
+  const btn = document.getElementById('pwdBtn');
+  if (!cp) { msg.textContent = ''; btn.disabled = true; return; }
+  if (np === cp) {
+    msg.textContent = '✅ Passwords match';
+    msg.style.color = '#10b981';
+    btn.disabled = false;
+  } else {
+    msg.textContent = '❌ Passwords do not match';
+    msg.style.color = '#ef4444';
+    btn.disabled = true;
+  }
+}
+
+// Auto-scroll to #changePassword anchor on load
+if (window.location.hash === '#changePassword') {
+  setTimeout(() => {
+    document.getElementById('changePassword').scrollIntoView({ behavior: 'smooth' });
+  }, 300);
+}
+</script>
+</body></html>

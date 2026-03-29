@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Faculty | College Portal{% endblock %}
+{% block navbar %}{% endblock %}
+{% block content %}
+{% include "components/sidebar.html" %}
+<div class="main-content">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+    <div>
+      <h2 style="font-weight:900;margin-bottom:4px">👩‍🏫 {{ session.get('department','') }} — Faculty</h2>
+      <p style="color:#64748b;font-size:13px">{{ faculty|length }} faculty members in your department</p>
+    </div>
+    <button onclick="document.getElementById('addModal').style.display='flex'" class="btn-accent" style="padding:10px 22px;font-size:14px">+ Add Faculty</button>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}{% for cat,msg in messages %}
+    <div style="background:{% if cat=='error' %}rgba(248,113,113,.1){% else %}rgba(0,245,160,.1){% endif %};border:1px solid {% if cat=='error' %}rgba(248,113,113,.3){% else %}rgba(0,245,160,.3){% endif %};border-radius:10px;padding:12px 16px;font-size:13px;color:{% if cat=='error' %}#f87171{% else %}#00f5a0{% endif %};margin-bottom:16px">{{ msg }}</div>
+    {% endfor %}{% endif %}
+  {% endwith %}
+
+  <div class="glass" style="padding:0;overflow:hidden">
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr style="background:#0c1424;border-bottom:1px solid #1a2840">
+            {% for h in ['#','Name','Emp ID','Department','Designation','Email','Actions'] %}
+            <th style="padding:12px 14px;text-align:left;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.07em">{{ h }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for f in faculty %}
+          <tr style="border-bottom:1px solid #1a2840;transition:.15s" onmouseover="this.style.background='#0c1424'" onmouseout="this.style.background='transparent'">
+            <td style="padding:12px 14px;color:#64748b">{{ loop.index }}</td>
+            <td style="padding:12px 14px;font-weight:700;color:#e2e8f0">{{ f['name'] }}</td>
+            <td style="padding:12px 14px;font-family:monospace;color:#38bdf8;font-size:12px">{{ f['emp_id'] or '—' }}</td>
+            <td style="padding:12px 14px;color:#94a3b8">{{ f['dept_name'] or '—' }}</td>
+            <td style="padding:12px 14px;color:#a78bfa">{{ f['designation'] or '—' }}</td>
+            <td style="padding:12px 14px;color:#64748b;font-size:12px">{{ f['email'] }}</td>
+            <td style="padding:12px 14px">
+              <div style="display:flex;gap:6px">
+                <button onclick="openEdit({{ f['id'] }},'{{ f['designation'] or '' }}')" style="padding:4px 10px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);border-radius:6px;color:#a78bfa;font-size:11px;font-weight:700;cursor:pointer">Edit</button>
+                <form method="POST" action="{{ url_for('hod_delete_faculty', fid=f['id']) }}" onsubmit="return confirm('Delete {{ f['name'] }}?')">
+                  <button type="submit" style="padding:4px 10px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:6px;color:#f87171;font-size:11px;font-weight:700;cursor:pointer">✕</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="7" style="padding:40px;text-align:center;color:#64748b">No faculty found in your department.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Add Faculty Modal -->
+  <div id="addModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center">
+    <div style="background:#080e1a;border:1px solid #1a2840;border-radius:18px;padding:32px;max-width:440px;width:90%">
+      <h5 style="font-weight:800;margin-bottom:20px">➕ Add Faculty</h5>
+      <form method="POST">
+        <input type="hidden" name="action" value="add">
+        <div style="margin-bottom:12px"><label class="lbl">Full Name</label><input class="inp" name="name" required placeholder="Faculty name"></div>
+        <div style="margin-bottom:12px"><label class="lbl">Email</label><input class="inp" name="email" type="email" required placeholder="faculty@email.com"></div>
+        <div style="margin-bottom:12px"><label class="lbl">Employee ID</label><input class="inp" name="emp_id" placeholder="e.g. FAC007"></div>
+        <div style="margin-bottom:16px">
+          <label class="lbl">Designation</label>
+          <select class="inp" name="designation">
+            <option value="Assistant Professor">Assistant Professor</option>
+            <option value="Associate Professor">Associate Professor</option>
+            <option value="Professor">Professor</option>
+          </select>
+        </div>
+        <p style="color:#64748b;font-size:12px;margin-bottom:16px">Default password: <strong style="color:#fbbf24">faculty123</strong></p>
+        <div style="display:flex;gap:10px">
+          <button type="submit" class="btn-accent" style="flex:1;padding:11px">Add Faculty</button>
+          <button type="button" onclick="document.getElementById('addModal').style.display='none'" style="flex:1;padding:11px;background:#0c1424;border:1px solid #1a2840;border-radius:10px;color:#94a3b8;cursor:pointer">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center">
+    <div style="background:#080e1a;border:1px solid #1a2840;border-radius:18px;padding:32px;max-width:360px;width:90%">
+      <h5 style="font-weight:800;margin-bottom:20px">✏️ Edit Faculty</h5>
+      <form method="POST">
+        <input type="hidden" name="action" value="edit">
+        <input type="hidden" name="faculty_id" id="editFacId">
+        <div style="margin-bottom:16px">
+          <label class="lbl">Designation</label>
+          <select class="inp" name="designation" id="editDesig">
+            <option value="Assistant Professor">Assistant Professor</option>
+            <option value="Associate Professor">Associate Professor</option>
+            <option value="Professor">Professor</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button type="submit" class="btn-accent" style="flex:1;padding:11px">Update</button>
+          <button type="button" onclick="document.getElementById('editModal').style.display='none'" style="flex:1;padding:11px;background:#0c1424;border:1px solid #1a2840;border-radius:10px;color:#94a3b8;cursor:pointer">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function openEdit(id, desig) {
+  document.getElementById('editFacId').value = id;
+  document.getElementById('editDesig').value = desig;
+  document.getElementById('editModal').style.display = 'flex';
+}
+</script>
+{% endblock %}

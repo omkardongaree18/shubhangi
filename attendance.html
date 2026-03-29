@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Attendance | AI University</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+body{font-family:'Segoe UI',sans-serif;background:#f0f4f8}
+.topbar{background:linear-gradient(90deg,#0d47a1,#0d6efd);padding:14px 25px;color:white;display:flex;justify-content:space-between;align-items:center}
+.sidebar{height:calc(100vh - 56px);background:linear-gradient(180deg,#0d47a1,#0d6efd);padding-top:16px;position:sticky;top:0}
+.sidebar a{color:rgba(255,255,255,.85);padding:12px 20px;display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500;border-left:3px solid transparent;transition:.2s}
+.sidebar a:hover,.sidebar a.active{background:rgba(255,255,255,.15);border-left-color:#ffc107;color:#fff}
+.sc{background:#fff;border-radius:16px;padding:24px;box-shadow:0 4px 16px rgba(0,0,0,.08);margin-bottom:24px}
+.att-bar{height:12px;border-radius:6px;background:#e5e7eb;overflow:hidden}
+.att-fill{height:100%;border-radius:6px}
+</style></head><body>
+<div class="topbar">
+  <h5 class="mb-0"><i class="bi bi-mortarboard-fill me-2"></i>AI University Portal</h5>
+  <div class="d-flex gap-3 align-items-center"><span><b>{{ user_name }}</b></span><a href="/logout" class="btn btn-light btn-sm">Logout</a></div>
+</div>
+<div class="container-fluid"><div class="row g-0">
+  <div class="col-md-2 sidebar">
+    <a href="/student/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="/student/profile"><i class="bi bi-person-circle"></i> My Profile</a>
+    <a href="/student/results"><i class="bi bi-bar-chart-line"></i> Results</a>
+    <a href="/student/attendance" class="active"><i class="bi bi-calendar-check"></i> Attendance</a>
+    <a href="/student/ai-insights"><i class="bi bi-robot"></i> AI Insights</a>
+    <a href="/student/chatbot"><i class="bi bi-chat-dots"></i> AI Chatbot</a>
+    <a href="/logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+  </div>
+  <div class="col-md-10" style="padding:28px">
+    <h4 class="mb-1">📅 Attendance Record</h4>
+    <p class="text-muted mb-4">Overall: <b>{{ avg_attendance }}%</b>
+      {% if avg_attendance >= 75 %}<span class="badge bg-success ms-2">✅ Safe</span>
+      {% else %}<span class="badge bg-danger ms-2">⚠ Below 75%</span>{% endif %}
+    </p>
+    {% if subj_att|selectattr('pct','lt',75)|list|length > 0 %}
+    <div class="alert alert-danger" style="font-size:13px"><i class="bi bi-exclamation-triangle-fill me-2"></i><b>{{ subj_att|selectattr('pct','lt',75)|list|length }} subject(s)</b> below 75% minimum — risk of detention.</div>
+    {% endif %}
+    <div class="row g-4 mb-4">
+      <div class="col-md-5">
+        <div class="sc"><h6 class="fw-bold mb-3">📊 Attendance Overview</h6>
+          <div style="position:relative;height:240px"><canvas id="attChart"></canvas></div>
+        </div>
+      </div>
+      <div class="col-md-7">
+        <div class="sc"><h6 class="fw-bold mb-3">📋 Subject Breakdown</h6>
+          {% for a in subj_att %}
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1"><span style="font-size:13px;font-weight:500">{{ a['subname'] }}</span>
+              <span style="font-size:13px;font-weight:700;color:{% if a['pct'] >= 75 %}#16a34a{% else %}#dc2626{% endif %}">{{ a['pct'] }}% ({{ a['present'] }}/{{ a['total'] }})</span>
+            </div>
+            <div class="att-bar"><div class="att-fill" style="width:{{ a['pct'] }}%;background:{% if a['pct'] >= 75 %}#16a34a{% elif a['pct'] >= 65 %}#d97706{% else %}#dc2626{% endif %}"></div></div>
+          </div>
+          {% else %}<p class="text-muted">No records found.</p>{% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="sc"><h6 class="fw-bold mb-3">📑 Full Attendance Table</h6>
+      <table class="table table-hover align-middle">
+        <thead class="table-info"><tr><th>Subject</th><th>Year</th><th>Present</th><th>Total</th><th>%</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for a in subj_att %}
+          <tr><td><b>{{ a['subname'] }}</b></td><td class="text-muted">{{ '' }}</td>
+            <td>{{ a['present'] }}</td><td>{{ a['total'] }}</td><td><b>{{ a['pct'] }}%</b></td>
+            <td>{% if a['pct'] >= 75 %}<span class="badge bg-success">✅ Safe</span>
+              {% elif a['pct'] >= 65 %}<span class="badge bg-warning text-dark">⚠ Low</span>
+              {% else %}<span class="badge bg-danger">❌ Critical</span>{% endif %}
+            </td>
+          </tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const att = {{ subj_att | tojson }};
+if(att.length){new Chart(document.getElementById('attChart'),{
+  type:'doughnut',
+  data:{labels:subj_att.map(a=>a['subname'].split(' ')[0]),
+    datasets:[{data:subj_att.map(a=>a['pct']),
+      backgroundColor:subj_att.map(a=>a['pct']>=75?'rgba(22,163,74,.8)':a['pct']>=65?'rgba(217,119,6,.8)':'rgba(220,38,38,.8)'),borderWidth:2}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}
+});}
+</script></body></html>

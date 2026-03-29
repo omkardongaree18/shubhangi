@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Class Analytics | AI University{% endblock %}
+{% block navbar %}{% endblock %}
+{% block extra_head %}
+<style>body{background:#04080f}</style>
+{% endblock %}
+{% block content %}
+{% include "components/sidebar.html" %}
+<div class="main-content">
+  <h2 style="font-weight:900;margin-bottom:6px">📊 Class Analytics</h2>
+  <p style="color:#64748b;margin-bottom:24px">Performance overview across all students and subjects</p>
+
+  <!-- KPIs -->
+  <div class="row g-3 mb-4">
+    {% for icon, val, lbl, color in [
+      ('👥', dept_stats.total_students, 'Total Students', '#00f5a0'),
+      ('📈', dept_stats.avg_cgpa, 'Class Avg CGPA', '#38bdf8'),
+      ('🚨', dept_stats.at_risk, 'At-Risk', '#f87171'),
+      ('📅', dept_stats.avg_attendance|string + '%', 'Avg Attendance', '#a78bfa'),
+    ] %}
+    <div class="col-6 col-md-3">
+      <div class="glass-sm text-center">
+        <div style="font-size:26px">{{ icon }}</div>
+        <div style="font-size:26px;font-weight:900;color:{{ color }};margin:5px 0 2px">{{ val }}</div>
+        <div style="color:#64748b;font-size:11px;text-transform:uppercase">{{ lbl }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="row g-4 mb-4">
+    <!-- CGPA distribution bar chart -->
+    <div class="col-md-6">
+      <div class="glass">
+        <h6 style="font-weight:800;margin-bottom:16px">📊 CGPA Distribution</h6>
+        <canvas id="cgpaChart" height="200"></canvas>
+      </div>
+    </div>
+    <!-- Attendance distribution -->
+    <div class="col-md-6">
+      <div class="glass">
+        <h6 style="font-weight:800;margin-bottom:16px">📅 Attendance Distribution</h6>
+        <canvas id="attChart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Risk breakdown pie -->
+    <div class="col-md-4">
+      <div class="glass">
+        <h6 style="font-weight:800;margin-bottom:16px">🤖 AI Risk Breakdown</h6>
+        <canvas id="riskChart" height="200"></canvas>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
+          {% for label, val, color in risk_breakdown %}
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="display:flex;align-items:center;gap:8px;font-size:13px"><span style="width:10px;height:10px;border-radius:50%;background:{{ color }};display:inline-block"></span>{{ label }}</span>
+            <span style="font-weight:700;color:{{ color }}">{{ val }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <!-- Student performance table -->
+    <div class="col-md-8">
+      <div class="glass">
+        <h6 style="font-weight:800;margin-bottom:16px">🏆 Student Performance Ranking</h6>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead><tr style="border-bottom:1px solid #1a2840">
+              {% for h in ['Rank','Student','CGPA','Attendance','Risk','Cluster'] %}
+              <th style="padding:10px;text-align:{% if loop.first or loop.index == 2 %}left{% else %}center{% endif %};color:#64748b;font-size:11px;text-transform:uppercase">{{ h }}</th>
+              {% endfor %}
+            </tr></thead>
+            <tbody>
+              {% for st in students_ranked %}
+              {% set rc = '#f87171' if st['risk_score'] > 0.55 else ('#fbbf24' if st['risk_score'] > 0.25 else '#00f5a0') %}
+              {% set cluster = '🏆 High Achiever' if st['cgpa'] >= 8 and st['att_pct'] >= 85 else ('📈 Average' if st['cgpa'] >= 6.5 else ('⚠️ Needs Help' if st['cgpa'] >= 5 else '🚨 At Risk')) %}
+              <tr style="border-bottom:1px solid #1a2840" onmouseover="this.style.background='#0c1424'" onmouseout="this.style.background='transparent'">
+                <td style="padding:10px;font-weight:900;color:{{ '#fbbf24' if loop.index <= 3 else '#64748b' }};font-size:15px">
+                  {{ ['🥇','🥈','🥉'][loop.index-1] if loop.index <= 3 else loop.index }}
+                </td>
+                <td style="padding:10px">
+                  <div style="font-weight:700">{{ st.name if st.name else '—' }}</div>
+                  <div style="color:#64748b;font-size:11px">{{ st['roll_no'] }}</div>
+                </td>
+                <td style="padding:10px;text-align:center;font-weight:800;color:#38bdf8">{{ st['cgpa'] }}</td>
+                <td style="padding:10px;text-align:center;color:{{ '#f87171' if st['att_pct'] < 75 else '#94a3b8' }}">{{ st['att_pct'] }}%</td>
+                <td style="padding:10px;text-align:center"><span style="background:{{ rc }}18;color:{{ rc }};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700">{{ (st['risk_score']*100)|int }}%</span></td>
+                <td style="padding:10px;text-align:center;font-size:12px">{{ cluster }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const chartOpts = {
+  responsive: true,
+  plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Outfit' } } } },
+  scales: { x: { ticks: { color: '#64748b' }, grid: { color: '#1a2840' } },
+            y: { ticks: { color: '#64748b' }, grid: { color: '#1a2840' } } }
+};
+
+// CGPA distribution
+new Chart(document.getElementById('cgpaChart'), {
+  type: 'bar',
+  data: {
+    labels: {{ cgpa_labels|tojson }},
+    datasets: [{ label: 'Students', data: {{ cgpa_data|tojson }},
+      backgroundColor: 'rgba(56,189,248,.6)', borderColor: '#38bdf8', borderWidth: 1, borderRadius: 8 }]
+  },
+  options: chartOpts
+});
+
+// Attendance distribution
+new Chart(document.getElementById('attChart'), {
+  type: 'bar',
+  data: {
+    labels: {{ att_labels|tojson }},
+    datasets: [{ label: 'Students', data: {{ att_data|tojson }},
+      backgroundColor: 'rgba(0,245,160,.5)', borderColor: '#00f5a0', borderWidth: 1, borderRadius: 8 }]
+  },
+  options: chartOpts
+});
+
+// Risk pie
+new Chart(document.getElementById('riskChart'), {
+  type: 'doughnut',
+  data: {
+    labels: {{ risk_labels|tojson }},
+    datasets: [{ data: {{ risk_vals|tojson }},
+      backgroundColor: ['rgba(0,245,160,.7)', 'rgba(251,191,36,.7)', 'rgba(248,113,113,.7)'],
+      borderWidth: 0 }]
+  },
+  options: { responsive: true, plugins: { legend: { display: false } } }
+});
+</script>
+{% endblock %}

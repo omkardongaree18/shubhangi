@@ -1,0 +1,44 @@
+{% set role = session.get('role', 'student') %}
+{% set uname = session.get('name', 'User') %}
+<div class="sidebar" id="sidebar">
+  <div style="padding:20px 20px 12px;border-bottom:1px solid #1a2840">
+    <div style="font-weight:900;font-size:17px;color:#fff">🎓 College Portal</div>
+    <div style="font-size:11px;color:#64748b;margin-top:2px">Academic Portal</div>
+  </div>
+  <div style="padding:14px 18px;border-bottom:1px solid #1a2840">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#00f5a0,#38bdf8);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">{{ '👨‍🎓' if role=='student' else ('👩‍🏫' if role=='faculty' else '🏢') }}</div>
+      <div style="overflow:hidden">
+        <div style="font-weight:700;font-size:13px;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ uname }}</div>
+        <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.05em">{{ role }}</div>
+      </div>
+    </div>
+  </div>
+  <nav style="padding:10px 8px;overflow-y:auto;flex:1">
+    {% if role == 'student' %}
+      {% set links = [('student_dashboard','bi-speedometer2','Dashboard',''),('student_profile','bi-person-circle','My Profile',''),('student_results','bi-file-earmark-bar-graph','Results',''),('student_attendance','bi-calendar-check','Attendance',''),('student_ai_insights','bi-robot','AI Insights',''),('student_chatbot','bi-chat-dots','AI Chatbot','🔴'),] %}
+    {% elif role == 'faculty' %}
+      {% set links = [('faculty_dashboard','bi-speedometer2','Dashboard',''),('upload_marks','bi-upload','Upload Marks',''),('manage_attendance','bi-calendar-check','Attendance',''),('weak_students','bi-exclamation-triangle','Weak Students',''),('class_analytics','bi-bar-chart-line','Class Analytics','')] %}
+    {% else %}
+      {% set links = [('hod_dashboard','bi-speedometer2','Dashboard',''),('hod_students','bi-people','All Students',''),('hod_faculty','bi-person-badge','Faculty',''),('hod_notices','bi-megaphone','Notices',''),('dept_analytics','bi-graph-up','Dept Analytics',''),('hod_reports','bi-file-earmark-text','Reports',''),('hod_messages','bi-envelope','Messages','')] %}
+    {% endif %}
+    {% for endpoint, icon, label, badge in links %}
+    {% set is_active = request.endpoint == endpoint %}
+    <a href="{{ url_for(endpoint) }}" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;color:{{ '#00f5a0' if is_active else '#94a3b8' }};background:{{ 'rgba(0,245,160,.1)' if is_active else 'transparent' }};margin-bottom:2px;transition:.2s;font-size:13px;text-decoration:none" onmouseover="if(!{{ 'true' if is_active else 'false' }})this.style.background='rgba(255,255,255,.04)'" onmouseout="if(!{{ 'true' if is_active else 'false' }})this.style.background='transparent'">
+      <i class="bi {{ icon }}" style="font-size:15px;flex-shrink:0"></i>
+      <span style="flex:1">{{ label }}</span>
+      {% if badge %}<span style="width:7px;height:7px;border-radius:50%;background:#f87171;flex-shrink:0"></span>{% endif %}
+    </a>
+    {% endfor %}
+    <div style="border-top:1px solid #1a2840;margin:10px 4px"></div>
+    <a href="/" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;color:#64748b;font-size:13px;text-decoration:none"><i class="bi bi-house" style="font-size:15px"></i> Public Site</a>
+  </nav>
+  <div style="padding:14px 18px;border-top:1px solid #1a2840">
+    <a href="{{ url_for('logout') }}" style="display:flex;align-items:center;gap:8px;color:#f87171;font-size:13px;text-decoration:none;font-weight:600"><i class="bi bi-box-arrow-left"></i> Logout</a>
+  </div>
+</div>
+<style>
+.sidebar{width:220px;height:100vh;background:#080e1a;border-right:1px solid #1a2840;position:fixed;left:0;top:0;z-index:100;display:flex;flex-direction:column}
+.main-content{margin-left:220px;min-height:100vh;padding:28px}
+@media(max-width:900px){.sidebar{transform:translateX(-100%);transition:.3s;z-index:200}.sidebar.open{transform:translateX(0)}.main-content{margin-left:0;padding:16px}}
+</style>

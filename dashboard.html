@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Student Dashboard | AI University</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+body{font-family:'Segoe UI',sans-serif;background:#f0f4f8}
+.topbar{background:linear-gradient(90deg,#0d47a1,#0d6efd);padding:14px 25px;color:white;display:flex;justify-content:space-between;align-items:center}
+.sidebar{height:calc(100vh - 56px);background:linear-gradient(180deg,#0d47a1,#0d6efd);padding-top:16px;position:sticky;top:0;overflow-y:auto}
+.sidebar a{color:rgba(255,255,255,.85);padding:12px 20px;display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500;border-left:3px solid transparent;transition:.2s}
+.sidebar a:hover,.sidebar a.active{background:rgba(255,255,255,.15);border-left-color:#ffc107;color:white}
+.card-box{border-radius:16px;padding:22px;color:white;box-shadow:0 6px 20px rgba(0,0,0,.15);transition:.3s}
+.card-box:hover{transform:translateY(-4px)}
+.bg1{background:linear-gradient(135deg,#ff6b6b,#ff9f43)}
+.bg2{background:linear-gradient(135deg,#1dd1a1,#10ac84)}
+.bg3{background:linear-gradient(135deg,#54a0ff,#2e86de)}
+.bg4{background:linear-gradient(135deg,#a55eea,#8854d0)}
+.sc{background:white;border-radius:16px;padding:24px;box-shadow:0 4px 16px rgba(0,0,0,.08);margin-bottom:24px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h5 class="mb-0"><i class="bi bi-mortarboard-fill me-2"></i>AI University Portal</h5>
+  <div class="d-flex align-items-center gap-3">
+    <span><i class="bi bi-person-circle me-1"></i><b>{{ user_name }}</b></span>
+    <a href="/logout" class="btn btn-light btn-sm">Logout</a>
+  </div>
+</div>
+<div class="container-fluid">
+<div class="row g-0">
+  <div class="col-md-2 sidebar">
+    <a href="/student/dashboard" class="active"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="/student/profile"><i class="bi bi-person-circle"></i> My Profile</a>
+    <a href="/student/results"><i class="bi bi-bar-chart-line"></i> Results</a>
+    <a href="/student/attendance"><i class="bi bi-calendar-check"></i> Attendance</a>
+    <a href="/student/ai-insights"><i class="bi bi-robot"></i> AI Insights</a>
+    <a href="/student/chatbot"><i class="bi bi-chat-dots"></i> AI Chatbot</a>
+    <a href="/logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+  </div>
+  <div class="col-md-10" style="padding:28px">
+    <h3 class="mb-1">📊 Academic Overview</h3>
+    <p class="text-muted mb-4" style="font-size:13px">Welcome back, <b>{{ user_name }}</b></p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+    <div class="alert alert-{{ cat }} alert-dismissible py-2">{{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    {% endfor %}
+    {% endwith %}
+
+    <!-- Latest Notices strip -->
+    {% if notices %}
+    <div class="mb-3 d-flex gap-2 flex-wrap">
+      {% for n in notices %}
+      <span class="badge bg-primary bg-opacity-10 text-primary" style="font-size:12px;padding:6px 12px;border-radius:20px">📢 {{ n.title[:40] }}{% if n.title|length > 40 %}…{% endif %}</span>
+      {% endfor %}
+      <a href="/notices" class="badge bg-secondary bg-opacity-10 text-secondary text-decoration-none" style="font-size:12px;padding:6px 12px;border-radius:20px">View All →</a>
+    </div>
+    {% endif %}
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="card-box bg1"><p style="opacity:.8;font-size:12px;margin-bottom:4px">SUBJECTS</p><h2 class="fw-bold mb-0">{{ total_subjects }}</h2></div>
+      </div>
+      <div class="col-md-3">
+        <div class="card-box bg2"><p style="opacity:.8;font-size:12px;margin-bottom:4px">AVG ATTENDANCE</p><h2 class="fw-bold mb-0">{{ avg_attendance }}%</h2></div>
+      </div>
+      <div class="col-md-3">
+        <div class="card-box bg3"><p style="opacity:.8;font-size:12px;margin-bottom:4px">AVERAGE MARKS</p><h2 class="fw-bold mb-0">{{ avg_marks }}%</h2></div>
+      </div>
+      <div class="col-md-3">
+        <div class="card-box bg4"><p style="opacity:.8;font-size:12px;margin-bottom:4px">AI STATUS</p><h2 class="fw-bold mb-0" style="color:{{ pred_clr }}">{{ pred }}</h2></div>
+      </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+      <div class="col-md-6">
+        <div class="sc"><h6 class="fw-bold mb-3">📈 Subject-wise Marks</h6>
+          <div style="position:relative;height:220px"><canvas id="marksChart"></canvas></div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="sc"><h6 class="fw-bold mb-3">📅 Attendance by Subject</h6>
+          <div style="position:relative;height:220px"><canvas id="attChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc">
+      <h6 class="fw-bold mb-3">📋 Marks Sheet</h6>
+      <table class="table table-hover align-middle">
+        <thead class="table-primary">
+          <tr><th>Subject</th><th>Semester</th><th>Internal</th><th>External</th><th>Total</th><th>Grade</th></tr>
+        </thead>
+        <tbody>
+          {% for m in marks %}
+          <tr>
+            <td><b>{{ m.subject }}</b></td>
+            <td class="text-muted">{{ m.semester }}</td>
+            <td>{{ m.internal }}</td>
+            <td>{{ m.external }}</td>
+            <td><b>{{ m.total }}</b></td>
+            <td><span class="badge bg-{{ 'success' if m.grade in ['O','A+','S'] else ('warning text-dark' if m.grade in ['A','B+','A','B'] else 'danger') }}">{{ m.grade }}</span></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="text-center text-muted py-4">No marks uploaded yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-3"><a href="/student/results" class="btn btn-primary w-100"><i class="bi bi-bar-chart-line me-2"></i>Full Results</a></div>
+      <div class="col-md-3"><a href="/student/attendance" class="btn btn-success w-100"><i class="bi bi-calendar-check me-2"></i>Attendance</a></div>
+      <div class="col-md-3"><a href="/student/ai-insights" class="btn btn-info w-100 text-white"><i class="bi bi-robot me-2"></i>AI Insights</a></div>
+      <div class="col-md-3"><a href="/student/chatbot" class="btn btn-warning w-100"><i class="bi bi-chat-dots me-2"></i>Ask AI</a></div>
+    </div>
+  </div>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const marks = {{ marks | tojson }};
+const att = {{ att | tojson }};
+const colors = ['rgba(255,107,107,.8)','rgba(29,209,161,.8)','rgba(84,160,255,.8)','rgba(165,94,234,.8)','rgba(255,159,67,.8)','rgba(72,219,251,.8)','rgba(255,82,82,.8)','rgba(0,210,211,.8)'];
+if(marks.length){
+  new Chart(document.getElementById('marksChart'),{
+    type:'bar',
+    data:{labels:marks.map(m=>m.subject.split(' ')[0]),
+      datasets:[{data:marks.map(m=>m.total),backgroundColor:colors,borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100},x:{grid:{display:false}}}}
+  });
+}
+if(att.length){
+  new Chart(document.getElementById('attChart'),{
+    type:'doughnut',
+    data:{labels:att.map(a=>a.subject.split(' ')[0]),
+      datasets:[{data:att.map(a=>a.percentage),backgroundColor:colors,borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}
+  });
+}
+</script>
+</body>
+</html>

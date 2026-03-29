@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI University Portal</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+:root{ --primary:#1a73e8; --dark:#0f172a; --light:#f1f5f9; }
+body{ font-family:'Segoe UI',sans-serif; background:var(--light); }
+.navbar{ background:linear-gradient(90deg,#0d47a1,var(--primary)); box-shadow:0 4px 12px rgba(0,0,0,0.2); }
+.navbar-brand{ font-weight:bold; font-size:22px; }
+.carousel-item img{ height:520px; object-fit:cover; filter:brightness(65%); }
+.carousel-caption{ bottom:30%; background:rgba(0,0,0,0.55); padding:20px; border-radius:10px; }
+.carousel-caption h1{ font-size:44px; font-weight:bold; }
+.carousel-caption p{ font-size:20px; }
+.glass-card{ background:white; border-radius:15px; box-shadow:0 6px 18px rgba(0,0,0,0.12); padding:30px; transition:0.3s; }
+.glass-card:hover{ transform:translateY(-5px); }
+.notice-item{ padding:10px 14px; border-left:3px solid var(--primary); background:#f8fafc; border-radius:0 8px 8px 0; margin-bottom:8px; font-size:14px; }
+.notice-tag{ display:inline-block; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:700; text-transform:uppercase; margin-right:6px; }
+.stats-section{ background:linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.65)),url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070') center/cover no-repeat; padding:80px 0; }
+.stat-card{ background:rgba(255,255,255,0.12); backdrop-filter:blur(10px); border-radius:20px; padding:40px 20px; text-align:center; color:white; transition:0.4s; box-shadow:0 8px 25px rgba(0,0,0,0.25); }
+.stat-card:hover{ transform:translateY(-10px); background:rgba(255,255,255,0.22); }
+.stat-card h2{ font-size:42px; font-weight:bold; margin:15px 0; }
+.stat-card p{ font-size:18px; letter-spacing:1px; }
+.emoji{ font-size:48px; }
+footer{ background:var(--dark); color:white; padding:18px; }
+.counter{ display:inline-block; }
+</style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="navbar-brand" href="/">🎓 AI University</a>
+    <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navmenu"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="navmenu">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="/courses">Courses</a></li>
+        <li class="nav-item"><a class="nav-link" href="/notices">Notices</a></li>
+        <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+        {% if session.get('user_id') %}
+        <li class="nav-item"><a class="btn btn-light ms-3" href="{{ url_for(session.role+'_dashboard' if session.role in ['student','faculty','hod'] else 'home') }}">Dashboard</a></li>
+        {% else %}
+        <li class="nav-item"><a class="btn btn-light ms-3" href="/login">Login</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- IMAGE SLIDER -->
+<div id="mainSlider" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#mainSlider" data-bs-slide-to="0" class="active"></button>
+    <button type="button" data-bs-target="#mainSlider" data-bs-slide-to="1"></button>
+    <button type="button" data-bs-target="#mainSlider" data-bs-slide-to="2"></button>
+  </div>
+  <div class="carousel-inner">
+    <div class="carousel-item active">
+      <img src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=2070" class="d-block w-100" alt="Campus">
+      <div class="carousel-caption"><h1>Welcome to AI Academic Portal</h1><p>Smart • Secure • Intelligent Learning</p><a href="/login" class="btn btn-primary btn-lg mt-2">Get Started →</a></div>
+    </div>
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=2070" class="d-block w-100" alt="Students">
+      <div class="carousel-caption"><h1>Track Student Performance</h1><p>AI Analytics • Reports • Insights</p><a href="/courses" class="btn btn-outline-light btn-lg mt-2">Explore Courses →</a></div>
+    </div>
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070" class="d-block w-100" alt="Technology">
+      <div class="carousel-caption"><h1>Empowering Digital Education</h1><p>Modern • Automated • Future Ready</p><a href="/about" class="btn btn-outline-light btn-lg mt-2">Learn More →</a></div>
+    </div>
+  </div>
+  <button class="carousel-control-prev" data-bs-target="#mainSlider" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+  <button class="carousel-control-next" data-bs-target="#mainSlider" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+</div>
+
+<!-- NOTICE + ABOUT -->
+<section class="container mt-5">
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="glass-card h-100">
+        <h4 class="mb-3">📢 Latest Notices</h4>
+        {% set tag_colors = {'EXAM':'danger','RESULT':'success','EVENT':'warning','PLACEMENT':'primary','INFO':'info','STAFF':'secondary','ALERT':'danger'} %}
+        {% if notices %}
+          {% for n in notices %}
+          <div class="notice-item" style="border-left-color:
+            {% if n.color=='danger' %}#dc3545
+            {% elif n.color=='success' %}#198754
+            {% elif n.color=='warning' %}#ffc107
+            {% elif n.color=='primary' %}#0d6efd
+            {% else %}#0d6efd{% endif %}">
+            <span class="notice-tag badge bg-{{ n.color }}">{{ n.tag }}</span>
+            <strong>{{ n.title }}</strong>
+            <div class="text-muted small mt-1">{{ n.body[:80] }}{% if n.body|length > 80 %}…{% endif %}</div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted">No notices at the moment.</p>
+        {% endif %}
+        <a href="/notices" class="btn btn-outline-primary btn-sm mt-2">View All Notices →</a>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="glass-card h-100">
+        <h4 class="mb-3">🏫 About Our Portal</h4>
+        <p class="mt-2">AI-powered academic monitoring system helping universities track student performance, attendance, results, and analytics in one smart digital platform.</p>
+        <ul class="list-unstyled mt-3">
+          <li class="mb-2">✔ AI Performance Prediction</li>
+          <li class="mb-2">✔ Smart Attendance Tracking</li>
+          <li class="mb-2">✔ Real-time Result Analytics</li>
+          <li class="mb-2">✔ Automated Parent Alerts</li>
+          <li class="mb-2">✔ Blockchain Certificates</li>
+          <li class="mb-2">✔ Role-based Secure Access</li>
+        </ul>
+        <a href="/about" class="btn btn-primary btn-sm mt-2">Learn More →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-section mt-5">
+  <div class="container">
+    <h2 class="text-center mb-5 fw-bold text-white">📊 University Highlights</h2>
+    <div class="row g-4">
+      {% for emoji, val, label in [('🎓','12,400+','Students'),('👨‍🏫','580+','Faculty'),('🏫','120+','Courses'),('🏆','97%','Placement Rate')] %}
+      <div class="col-md-3 col-6">
+        <div class="stat-card"><div class="emoji">{{ emoji }}</div><h2>{{ val }}</h2><p>{{ label }}</p></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ROLE LOGIN CARDS -->
+<section class="container my-5">
+  <h2 class="text-center fw-bold mb-4">Choose Your Role</h2>
+  <div class="row g-4 justify-content-center">
+    {% for icon, role, desc, color in [('👨‍🎓','Student','View results, attendance, AI insights','#0d6efd'),('👩‍🏫','Faculty','Upload marks, manage attendance','#198754'),('🏢','HOD / Admin','Department analytics, reports, notices','#6610f2')] %}
+    <div class="col-md-3">
+      <div class="glass-card text-center h-100" style="border-top:4px solid {{ color }}; cursor:pointer" onclick="window.location='/login'">
+        <div style="font-size:48px; margin-bottom:12px">{{ icon }}</div>
+        <h5 class="fw-bold" style="color:{{ color }}">{{ role }}</h5>
+        <p class="text-muted small">{{ desc }}</p>
+        <a href="/login" class="btn btn-sm" style="background:{{ color }};color:white;border-radius:20px">Login →</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section style="background:#e8f0fe; padding:60px 0;">
+  <div class="container">
+    <h2 class="text-center fw-bold mb-5">🚀 Platform Features</h2>
+    <div class="row g-4">
+      {% for icon,title,desc in [
+        ('📊','Performance Analytics','Visual dashboards monitoring marks, attendance, and academic trends in real-time'),
+        ('🤖','AI Prediction Engine','ML models predict at-risk students and recommend personalized improvements'),
+        ('🔐','Secure Access','Encrypted database with role-based access control for all user types'),
+        ('📈','Result Analytics','Interactive graphs tracking semester-wise growth and comparisons'),
+        ('📩','Automated Alerts','Instant notifications to students, faculty, and parents automatically'),
+        ('🔗','Blockchain Certs','Tamper-proof digital certificates verified on the blockchain')
+      ] %}
+      <div class="col-md-4">
+        <div class="glass-card h-100">
+          <div style="font-size:36px; margin-bottom:10px">{{ icon }}</div>
+          <h5 class="fw-bold">{{ title }}</h5>
+          <p class="text-muted small">{{ desc }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<footer class="text-center">© {{ current_year }} AI University Portal | All Rights Reserved</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

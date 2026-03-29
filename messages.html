@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Messages | AI University{% endblock %}
+{% block navbar %}{% endblock %}
+{% block content %}
+{% include "components/sidebar.html" %}
+<div class="main-content">
+  <h2 style="font-weight:900;margin-bottom:24px">📩 Contact Messages</h2>
+  <div class="glass">
+    {% if messages %}
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr style="border-bottom:2px solid #1a2840">
+          {% for h in ['From','Email','Message','Received'] %}
+          <th style="padding:12px;text-align:left;color:#64748b;font-size:11px;text-transform:uppercase">{{ h }}</th>
+          {% endfor %}
+        </tr></thead>
+        <tbody>
+          {% for m in messages %}
+          <tr style="border-bottom:1px solid #1a2840" onmouseover="this.style.background='#0c1424'" onmouseout="this.style.background='transparent'">
+            <td style="padding:12px;font-weight:700">{{ m['name'] }}</td>
+            <td style="padding:12px;color:#38bdf8;font-size:12px">{{ m['email'] }}</td>
+            <td style="padding:12px;color:#94a3b8;max-width:400px">{{ m['message'][:100] }}{% if m['message']|length > 100 %}…{% endif %}</td>
+            <td style="padding:12px;color:#64748b;font-size:12px;white-space:nowrap">{{ m['created_at'][:16] if m['created_at'] else '' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="text-align:center;color:#64748b;padding:60px">
+      <div style="font-size:48px;margin-bottom:14px">📭</div>
+      <p>No messages yet.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+<nav class="navbar-custom">
+  <div class="container d-flex align-items-center justify-content-between">
+    <a href="{{ url_for('home') }}" class="nav-brand">🎓 AI University</a>
+    <ul class="nav-links d-none d-lg-flex">
+      <li><a href="{{ url_for('home') }}" class="{{ 'active' if request.endpoint=='home' }}">Home</a></li>
+      <li><a href="{{ url_for('about') }}" class="{{ 'active' if request.endpoint=='about' }}">About</a></li>
+      <li><a href="{{ url_for('courses') }}" class="{{ 'active' if request.endpoint=='courses' }}">Courses</a></li>
+      <li><a href="{{ url_for('notices') }}" class="{{ 'active' if request.endpoint=='notices' }}">Notices</a></li>
+      <li><a href="{{ url_for('contact') }}" class="{{ 'active' if request.endpoint=='contact' }}">Contact</a></li>
+      {% if session.user_id %}
+        {% if session.role == 'student' %}
+          <li><a href="{{ url_for('student_dashboard') }}" class="btn-login-nav">Dashboard →</a></li>
+        {% elif session.role == 'faculty' %}
+          <li><a href="{{ url_for('faculty_dashboard') }}" class="btn-login-nav">Dashboard →</a></li>
+        {% else %}
+          <li><a href="{{ url_for('hod_dashboard') }}" class="btn-login-nav">Dashboard →</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('logout') }}" style="color:var(--danger)!important">Logout</a></li>
+      {% else %}
+        <li><a href="{{ url_for('login') }}" class="btn-login-nav">Login →</a></li>
+      {% endif %}
+    </ul>
+  </div>
+</nav>

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Manage Notices | AI University{% endblock %}
+{% block navbar %}{% endblock %}
+{% block content %}
+{% include "components/sidebar.html" %}
+<div class="main-content">
+  <h2 style="font-weight:900;margin-bottom:24px">📢 Manage Notices</h2>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}{% for cat, msg in messages %}
+    <div style="background:rgba(0,245,160,.1);border:1px solid rgba(0,245,160,.3);border-radius:10px;padding:12px 16px;font-size:13px;color:#00f5a0;margin-bottom:16px">{{ msg }}</div>
+    {% endfor %}{% endif %}
+  {% endwith %}
+
+  <div class="row g-4">
+    <!-- Post form -->
+    <div class="col-md-5">
+      <div class="glass">
+        <h6 style="font-weight:800;margin-bottom:18px">+ Post New Notice</h6>
+        <form method="POST" action="{{ url_for('hod_notices') }}">
+          <input type="hidden" name="action" value="add">
+          <div style="margin-bottom:14px"><label class="lbl">Title</label><input type="text" class="inp" name="title" placeholder="Notice title" required></div>
+          <div style="margin-bottom:14px"><label class="lbl">Body</label><textarea class="inp" name="body" placeholder="Notice details…" rows="4"></textarea></div>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="lbl">Tag</label>
+              <select class="inp" name="tag">
+                {% for t in ['EXAM','RESULT','EVENT','PLACEMENT','STAFF','INFO','ALERT'] %}
+                <option value="{{ t }}">{{ t }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="lbl">Color</label>
+              <select class="inp" name="color">
+                {% for c, l in [('danger','Red'),('success','Green'),('warning','Yellow'),('primary','Blue'),('info','Purple')] %}
+                <option value="{{ c }}">{{ l }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div style="margin-bottom:16px">
+            <label class="lbl">Target Audience</label>
+            <select class="inp" name="target_role">
+              {% for v, l in [('all','Everyone'),('student','Students Only'),('faculty','Faculty Only'),('hod','HOD Only')] %}
+              <option value="{{ v }}">{{ l }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn-accent" style="width:100%;padding:12px">Post Notice</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Notice list -->
+    <div class="col-md-7">
+      <div class="glass">
+        <h6 style="font-weight:800;margin-bottom:16px">All Notices ({{ notices|length }})</h6>
+        {% set color_map = {'danger':'#f87171','success':'#00f5a0','warning':'#fbbf24','primary':'#38bdf8','info':'#a78bfa'} %}
+        {% if notices %}
+          {% for n in notices %}
+          {% set nc = color_map.get(n['color'],'#38bdf8') %}
+          <div style="padding:14px;background:#0c1424;border:1px solid #1a2840;border-left:3px solid {{ nc }};border-radius:10px;margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                  <span style="background:{{ nc }}20;color:{{ nc }};padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700">{{ n['tag'] }}</span>
+                  
+                  {% if not n['is_active'] %}<span style="color:#64748b;font-size:10px">[Hidden]</span>{% endif %}
+                </div>
+                <div style="font-weight:700;font-size:14px;margin-bottom:3px">{{ n['title'] }}</div>
+                <div style="color:#64748b;font-size:12px;margin-bottom:4px">{{ n['body'][:80] }}{% if n['body']|length > 80 %}…{% endif %}</div>
+                <div style="color:#475569;font-size:11px">{{ n['created_at'][:10] if n['created_at'] else '' }}</div>
+              </div>
+              {% if n['is_active'] %}
+              <form method="POST" action="{{ url_for('hod_notices') }}" style="margin:0">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="notice_id" value="{{ n['id'] }}">
+                <button type="submit" style="padding:5px 10px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:7px;color:#f87171;font-size:11px;cursor:pointer" onclick="return confirm('Remove this notice?')">Remove</button>
+              </form>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+        <p style="color:#64748b">No notices posted yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

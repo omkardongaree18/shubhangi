@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Contact | AI University</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:#04080f;color:#e2e8f0}
+.navbar-custom{background:rgba(4,8,15,.92);backdrop-filter:blur(12px);border-bottom:1px solid #1a2840;position:fixed;width:100%;top:0;z-index:999;padding:12px 0}
+.nav-brand{font-weight:900;font-size:22px;color:#fff;text-decoration:none}
+.nav-links{display:flex;align-items:center;gap:6px;list-style:none;margin:0;padding:0}
+.nav-links a{color:#94a3b8;text-decoration:none;padding:8px 14px;border-radius:8px;font-size:14px;transition:all .2s}
+.nav-links a:hover,.nav-links a.active{background:rgba(0,245,160,.12);color:#00f5a0}
+.btn-login-nav{background:linear-gradient(135deg,#00f5a0,#38bdf8)!important;color:#04080f!important;font-weight:800!important;border-radius:10px!important;padding:8px 20px!important}
+.glass{background:#080e1a;border:1px solid #1a2840;border-radius:20px;padding:34px}
+.inp{background:#0c1424;border:1px solid #1a2840;border-radius:10px;padding:12px 14px;color:#e2e8f0;font-size:14px;outline:none;width:100%;transition:border .2s;font-family:'Outfit',sans-serif}
+.inp:focus{border-color:#00f5a0}
+textarea.inp{resize:vertical;min-height:120px}
+footer{background:#04080f;border-top:1px solid #1a2840;padding:24px 0;color:#64748b;font-size:13px;text-align:center;margin-top:60px}
+</style>
+</head>
+<body>
+<nav class="navbar-custom">
+  <div class="container d-flex align-items-center justify-content-between">
+    <a href="/" class="nav-brand">🎓 AI University</a>
+    <ul class="nav-links d-none d-lg-flex">
+      <li><a href="/">Home</a></li><li><a href="/about">About</a></li>
+      <li><a href="/courses">Courses</a></li><li><a href="/notices">Notices</a></li>
+      <li><a href="/contact" class="active">Contact</a></li>
+      <li><a href="/login" class="btn-login-nav">Login →</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div style="padding:130px 0 60px;background:linear-gradient(135deg,#080e1a,#04080f);border-bottom:1px solid #1a2840;text-align:center">
+  <h1 style="font-size:clamp(30px,4vw,52px);font-weight:900;margin-bottom:10px">Contact <span style="color:#00f5a0">Us</span></h1>
+  <p style="color:#64748b;font-size:16px">Send us a message and we'll get back to you shortly.</p>
+</div>
+
+<div class="container" style="padding:56px 20px">
+  <div class="row justify-content-center g-5">
+    <div class="col-md-6">
+      <div class="glass">
+        <h3 style="font-weight:800;margin-bottom:20px">📩 Send a Message</h3>
+        <div id="ok-msg" style="display:none;background:rgba(0,245,160,.1);border:1px solid rgba(0,245,160,.3);border-radius:10px;padding:12px 16px;color:#00f5a0;margin-bottom:16px">✅ Message sent! We'll reply soon.</div>
+        <div id="err-msg" style="display:none;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:10px;padding:12px 16px;color:#f87171;margin-bottom:16px">❌ Please fill all fields.</div>
+        <form id="cf">
+          <div style="margin-bottom:14px">
+            <label style="color:#64748b;font-size:12px;letter-spacing:.05em;display:block;margin-bottom:5px">FULL NAME</label>
+            <input type="text" class="inp" name="name" placeholder="Your name" required>
+          </div>
+          <div style="margin-bottom:14px">
+            <label style="color:#64748b;font-size:12px;letter-spacing:.05em;display:block;margin-bottom:5px">EMAIL</label>
+            <input type="email" class="inp" name="email" placeholder="your@email.com" required>
+          </div>
+          <div style="margin-bottom:16px">
+            <label style="color:#64748b;font-size:12px;letter-spacing:.05em;display:block;margin-bottom:5px">MESSAGE</label>
+            <textarea class="inp" name="message" placeholder="Write your message…" required></textarea>
+          </div>
+          <button type="submit" id="sbtn" style="width:100%;padding:13px;background:linear-gradient(135deg,#00f5a0,#38bdf8);border:none;border-radius:12px;color:#04080f;font-weight:800;font-size:15px;cursor:pointer;font-family:'Outfit',sans-serif">Send Message →</button>
+        </form>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="glass mb-4">
+        <h4 style="font-weight:800;margin-bottom:16px">📍 Contact Info</h4>
+        {% for icon,lbl,val in [("📧","Email","admin@aiuniversity.edu"),("📞","Phone","+91 98765 43210"),("📍","Address","Navi Mumbai, Maharashtra"),("🕒","Hours","Mon–Sat: 9 AM – 6 PM")] %}
+        <div style="display:flex;gap:12px;margin-bottom:14px;padding:11px;background:#0c1424;border-radius:10px">
+          <span style="font-size:17px">{{ icon }}</span>
+          <div><div style="color:#64748b;font-size:10px;margin-bottom:2px">{{ lbl.upper() }}</div><div style="color:#e2e8f0;font-size:13px">{{ val }}</div></div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="glass" style="background:linear-gradient(135deg,rgba(0,245,160,.07),#080e1a);border-color:rgba(0,245,160,.25)">
+        <h5 style="font-weight:800;margin-bottom:8px">🎓 Student Login</h5>
+        <p style="color:#64748b;font-size:13px;margin-bottom:14px">Access your academic dashboard now.</p>
+        <a href="/login" style="display:block;text-align:center;padding:11px;background:linear-gradient(135deg,#00f5a0,#38bdf8);color:#04080f;border-radius:10px;font-weight:800;text-decoration:none">Login to Portal →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>© {{ current_year }} AI University Academic Portal · All Rights Reserved</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.getElementById("cf").addEventListener("submit",function(e){
+  e.preventDefault();
+  document.getElementById('err-msg').style.display='none';
+  const btn=document.getElementById("sbtn");
+  btn.textContent="⏳ Sending…";btn.disabled=true;
+  fetch("/contact",{method:"POST",body:new FormData(this)})
+    .then(r=>r.json()).then(d=>{
+      if(d.ok){
+        document.getElementById("ok-msg").style.display="block";
+        this.reset();
+      } else {
+        document.getElementById("err-msg").style.display="block";
+      }
+      btn.textContent="Send Message →";btn.disabled=false;
+    }).catch(()=>{btn.textContent="Send Message →";btn.disabled=false;});
+});
+</script>
+</body>
+</html>

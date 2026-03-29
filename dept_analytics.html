@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Department Analytics | AI University{% endblock %}
+{% block navbar %}{% endblock %}
+{% block content %}
+{% include "components/sidebar.html" %}
+<div class="main-content">
+  <h2 style="font-weight:900;margin-bottom:6px">📊 Department Analytics</h2>
+  <p style="color:#64748b;margin-bottom:24px">Comprehensive performance overview for the entire department</p>
+
+  <div class="row g-3 mb-4">
+    {% for icon, val, lbl, color in [
+      ('🎓', stats.total_students, 'Students', '#00f5a0'),
+      ('📈', stats.avg_cgpa, 'Avg CGPA', '#38bdf8'),
+      ('🚨', stats.at_risk, 'At-Risk', '#f87171'),
+      ('📅', stats.avg_attendance|string + '%', 'Avg Attendance', '#a78bfa'),
+    ] %}
+    <div class="col-6 col-md-3">
+      <div class="glass-sm text-center">
+        <div style="font-size:28px">{{ icon }}</div>
+        <div style="font-size:28px;font-weight:900;color:{{ color }};margin:6px 0 2px">{{ val }}</div>
+        <div style="color:#64748b;font-size:11px;text-transform:uppercase">{{ lbl }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-8">
+      <div class="glass">
+        <h6 style="font-weight:800;margin-bottom:16px">📈 Semester-wise Dept Performance Trend</h6>
+        <canvas id="trendChart" height="120"></canvas>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="glass">
+        <h6 style="font-weight:800;margin-bottom:16px">🎯 Grade Distribution</h6>
+        <canvas id="gradeChart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="glass">
+        <h6 style="font-weight:800;margin-bottom:16px">🏫 Course-wise Enrollment</h6>
+        {% for c in courses %}
+        <div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:13px">
+            <span>{{ c.name[:30] }}</span>
+            <span style="color:#00f5a0;font-weight:700">{{ c.enrolled }}/{{ c.seats }}</span>
+          </div>
+          <div style="background:#0c1424;border-radius:4px;height:8px">
+            <div style="height:8px;border-radius:4px;background:linear-gradient(90deg,#00f5a0,#38bdf8);width:{{ (c.enrolled / [c.seats, 1]|max * 100)|int }}%"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="glass">
+        <h6 style="font-weight:800;margin-bottom:16px">🤖 AI Cluster Distribution</h6>
+        {% for icon, label, count, color in cluster_data %}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:#0c1424;border-radius:10px;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:20px">{{ icon }}</span>
+            <span style="font-size:14px;font-weight:600">{{ label }}</span>
+          </div>
+          <div style="text-align:right">
+            <div style="font-weight:800;color:{{ color }};font-size:16px">{{ count }}</div>
+            <div style="font-size:10px;color:#64748b">students</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const chartOpts = {
+  responsive: true,
+  plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Outfit' } } } },
+  scales: { x: { ticks: { color: '#64748b' }, grid: { color: '#1a2840' } },
+            y: { ticks: { color: '#64748b' }, grid: { color: '#1a2840' }, min: 0, max: 10 } }
+};
+new Chart(document.getElementById('trendChart'), {
+  type: 'line',
+  data: {
+    labels: ['Sem 1','Sem 2','Sem 3','Sem 4','Sem 5','Sem 6'],
+    datasets: [
+      { label: 'Avg CGPA', data: [6.8, 7.1, 7.0, 7.3, 7.5, {{ stats.avg_cgpa }}],
+        borderColor: '#00f5a0', backgroundColor: 'rgba(0,245,160,.08)', fill: true, tension: .4, pointBackgroundColor: '#00f5a0' },
+      { label: 'Target', data: [7,7,7,7,7,7], borderColor: '#1a2840', borderDash: [5,5], pointRadius: 0 }
+    ]
+  },
+  options: chartOpts
+});
+new Chart(document.getElementById('gradeChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['O','A+','A','B','C','F'],
+    datasets: [{ data: {{ grade_dist|tojson }},
+      backgroundColor: ['rgba(0,245,160,.7)','rgba(56,189,248,.7)','rgba(167,139,250,.7)','rgba(251,191,36,.7)','rgba(251,146,60,.7)','rgba(248,113,113,.7)'],
+      borderWidth: 0 }]
+  },
+  options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Outfit' } } } } }
+});
+</script>
+{% endblock %}
