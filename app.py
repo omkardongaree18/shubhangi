@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import sqlite3, hashlib, os, random, json, io
 from datetime import date, datetime, timedelta
 from functools import wraps
-from database.db_setup import get_db, hash_password, init_db, DB_PATH
+from db_setup import get_db, hash_password, init_db, DB_PATH
 
 app = Flask(__name__)
 app.secret_key = 'college_acad_mgmt_secret_2026'
