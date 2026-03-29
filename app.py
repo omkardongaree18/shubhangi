@@ -149,8 +149,10 @@ def inject_globals():
 # ── PUBLIC ROUTES ─────────────────────────────────────────────────
 @app.route('/')
 def home():
-    return "App working 🚀"
-
+    db = get_db()
+    notices = db.execute("SELECT * FROM notices WHERE is_active=1 ORDER BY created_at DESC LIMIT 5").fetchall()
+    db.close()
+    return render_template('index.html', notices=notices)
 @app.route('/about')
 def about():
     return render_template('about.html')
